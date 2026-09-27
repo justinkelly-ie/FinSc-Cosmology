@@ -1,10 +1,10 @@
 module Cosmology
 
-import public Math.Cosmology.GaloisAdjunction
-import public Math.Cosmology.MacroEnvelope
-import public Math.Cosmology.MetricLawLedger
-import public Math.Cosmology.CapacityBudget
+import public Stage0.Cosmology.CapacityBudget
+import public Stage0.Cosmology.MetricLawLedger
+import public Stage0.Cosmology.StreamingCosmology
+
+import public Stage1.Cosmology.MultisetAdjunction
+import public Stage1.Cosmology.MacroEnvelope
 
 %default total
-
-

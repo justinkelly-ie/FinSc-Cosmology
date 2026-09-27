@@ -1,6 +1,7 @@
-module Math.Cosmology.MetricLawLedger
+module Stage0.Cosmology.MetricLawLedger
 
-import public Core
+import public Stage0.BoxInt
+import public Stage0.Multiset
 
 %default total
 

@@ -1,8 +1,10 @@
-module Math.Cosmology.CapacityBudget
+module Stage0.Cosmology.CapacityBudget
 
-import public Core
-import public Core.TypeTheory.ThreeLevel
-import public Math.Cosmology.MetricLawLedger
+import public Stage0.BoxInt
+import public Stage0.WitnessLedger
+import public Stage0.Multiset
+import public Stage2.ThreeLevel
+import public Stage0.Cosmology.MetricLawLedger
 
 %default total
 
@@ -49,7 +51,7 @@ totalCapacity (MkCapacityBudget vm de dm) = vm + de + dm
 %inline public export
 vmMaxelsAtEpoch : Nat -> Nat
 vmMaxelsAtEpoch ep =
-  if natLTE ep 1 then 0 else powerNat 3 3
+  if ep <= 1 then 0 else powerNat 3 3
 
 ||| Evaluates dark matter metric law count for epoch ep (0 at Genesis -> 55 at Epoch 37).
 %inline public export
@@ -57,7 +59,7 @@ dmLawsAtEpoch : Nat -> Nat
 dmLawsAtEpoch 0 = 0
 dmLawsAtEpoch 1 = 0
 dmLawsAtEpoch ep =
-  if natLTE ep 17 then
+  if ep <= 17 then
     minus ep 1
   else
     17 + (minus ep 18 * 2)
@@ -97,7 +99,7 @@ capacityBudgetForCycleState (MkCycleState u e _) = epochCapacityBudget e
 ||| Erased compile-time proof witness verifying scale horizon exhaustion index k does not exceed 137.
 public export
 0 HorizonBoundWitness : (k : Nat) -> Type
-HorizonBoundWitness k = natLTE k 137 = True
+HorizonBoundWitness k = (k <= 137) = True
 
 ||| Compile-time static witness for Observer Epoch 37 horizon bound (37 <= 137).
 public export
@@ -125,7 +127,7 @@ capacityBudgetForBoundedCycleState (MkBoundedCycleState st _) = capacityBudgetFo
 -- 6. SCALE JUMP FUNCTOR ACROSS 38 OBSERVER CYCLES
 --------------------------------------------------------------------------------
 
-||| Category-theoretic ScaleJumpFunctor transporting state space capacity bounds across observer cycles.
+||| ScaleJumpFunctor transporting state space capacity bounds across observer cycles.
 public export
 record ScaleJumpFunctor (0 s1 : Type) (0 s2 : Type) where
   constructor MkScaleJumpFunctor
@@ -151,16 +153,16 @@ scaleJumpObserverFunctor = MkScaleJumpFunctor
 
 ||| Proof witness verifying Genesis vacuum state before baryogenesis has VM=0, DM=0, DE=128 (Total=128).
 public export
-0 prfGenesisPreBaryogenesisTotal128 : Math.Cosmology.CapacityBudget.totalCapacity Math.Cosmology.CapacityBudget.genesisVacuumBudget = 128
+0 prfGenesisPreBaryogenesisTotal128 : Stage0.Cosmology.CapacityBudget.totalCapacity Stage0.Cosmology.CapacityBudget.genesisVacuumBudget = 128
 prfGenesisPreBaryogenesisTotal128 = Refl
 
 ||| Proof witness verifying Observer Epoch 37 after baryogenesis reaches Primorial 210 capacity (Total=210).
 public export
-0 prfObserverEpoch37SaturationTotal210 : Math.Cosmology.CapacityBudget.totalCapacity Math.Cosmology.CapacityBudget.observerEpoch37Budget = 210
+0 prfObserverEpoch37SaturationTotal210 : Stage0.Cosmology.CapacityBudget.totalCapacity Stage0.Cosmology.CapacityBudget.observerEpoch37Budget = 210
 prfObserverEpoch37SaturationTotal210 = Refl
 
 ||| Proof witness verifying scale jump functor preserves total Primorial 210 capacity at Observer Epoch 37.
 public export
 0 prfScaleJumpFunctorPreservesPrimorial210 : 
-    totalCapacity (transportBudget (scaleJumpObserverFunctor {u=37} {a=Nat}) Math.Cosmology.CapacityBudget.genesisVacuumBudget) = 210
+    totalCapacity (transportBudget (scaleJumpObserverFunctor {u=37} {a=Nat}) Stage0.Cosmology.CapacityBudget.genesisVacuumBudget) = 210
 prfScaleJumpFunctorPreservesPrimorial210 = Refl

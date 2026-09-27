@@ -1,16 +1,14 @@
 package FinSc-Cosmology
 version = 0.3.2
 authors = "Justin Kelly"
-brief   = "Layer 9 Galois Adjunctions, Abstract Interpretation & Cosmological Scaling Subsystem."
+brief   = "Layer 9 Multiset Adjunctions, Abstract Interpretation & Cosmological Scaling Subsystem."
 
 depends = FinSc-Geometry, FinSc-Multiset-Core, FinSc-Multiset-Transform, FinSc-Thermodynamics, base, linear
 sourcedir = "src"
 
 modules = Cosmology,
-          Math.Cosmology.GaloisAdjunction,
-          Math.Cosmology.MacroEnvelope,
-          Math.Cosmology.MetricLawLedger,
-          Math.Cosmology.CapacityBudget
-
-
-
+          Stage0.Cosmology.CapacityBudget,
+          Stage0.Cosmology.MetricLawLedger,
+          Stage0.Cosmology.StreamingCosmology,
+          Stage1.Cosmology.MultisetAdjunction,
+          Stage1.Cosmology.MacroEnvelope

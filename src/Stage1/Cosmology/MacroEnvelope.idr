@@ -1,12 +1,13 @@
-module Math.Cosmology.MacroEnvelope
+module Stage1.Cosmology.MacroEnvelope
 
-import Core.BoxInt
-import Core.UnixelFraction
-import Core.VexelMaxel
-import Geometry.Applicative
-import Geometry.MetricalBounds
-import Math.ChromoCategory
-import Math.Cosmology.GaloisAdjunction
+import Stage0.BoxInt
+import Stage1.UnixelFraction
+import Stage1.VexelMaxel
+import Stage0.Applicative
+import Stage1.MetricalBounds
+import Stage1.ChromoCategory
+import Stage1.QuadStream
+import Stage1.Cosmology.MultisetAdjunction
 
 %default total
 
@@ -52,7 +53,36 @@ macroClusteringH2O v = lookupUnixel (MkUnixel 3) v
 public export
 initMacroCosmicEnvelope : Vexel
 initMacroCosmicEnvelope =
-  macroCosmicVexel (intToBoxInt 1) (intToBoxInt 27) (intToBoxInt 55) (intToBoxInt 128)
+  macroCosmicVexel (intToBoxInt 1) (natToBoxInt (cast Stage1.FourGeometriesActions.ellipticLatticeCapacity)) (natToBoxInt (cast Stage1.FourGeometriesActions.darkMatterTriangularResidue)) (natToBoxInt (cast Stage1.FourGeometriesActions.hyperbolicRomCapacity))
+
+||| QuadStream representation of cosmological fluid envelope:
+|||   ellipticStream   : Baryonic Matter (27 states)
+|||   hyperbolicStream : Vacuum / Clustering Energy (128 states)
+|||   parabolicStream  : FLRW Spacetime Expansion Stream
+|||   substrateStream  : Dark Matter Substrate Law Ledger (55 states)
+public export
+macroCosmicQuadStream : BoxInt -> BoxInt -> BoxInt -> BoxInt -> QuadStreamMultiset BoxInt
+macroCosmicQuadStream scale baryon dark cluster =
+  MkQuadStream
+    (AddM (intToBoxInt 1) baryon ZeroM)
+    (AddM (intToBoxInt 1) cluster ZeroM)
+    (AddM (intToBoxInt 1) scale ZeroM)
+    (AddM (intToBoxInt 1) dark ZeroM)
+
+public export
+initMacroCosmicQuadStream : QuadStreamMultiset BoxInt
+initMacroCosmicQuadStream =
+  macroCosmicQuadStream (intToBoxInt 1) (natToBoxInt (cast Stage1.FourGeometriesActions.ellipticLatticeCapacity)) (natToBoxInt (cast Stage1.FourGeometriesActions.darkMatterTriangularResidue)) (natToBoxInt (cast Stage1.FourGeometriesActions.hyperbolicRomCapacity))
+
+||| Computes total cosmic mass aggregated across QuadStream sectors (27 + 55 + 128 = 210).
+public export
+computeTotalCosmicMassQuadStream : QuadStreamMultiset BoxInt -> BoxInt
+computeTotalCosmicMassQuadStream qs = quadStreamTotalMass qs - multisetSum qs.parabolicStream
+
+||| Compiler proof witness verifying QuadStream cosmic budget closure (27 + 55 + 128 = 210).
+public export
+0 verifyQuadStreamCosmicMassBudget : computeTotalCosmicMassQuadStream Stage1.Cosmology.MacroEnvelope.initMacroCosmicQuadStream = intToBoxInt 210
+verifyQuadStreamCosmicMassBudget = Refl
 
 --------------------------------------------------------------------------------
 -- 2. COSMOLOGICAL EXPANSION & STAR FORMATION THRESHOLDS
@@ -79,7 +109,7 @@ isStarFormationAllowed env =
 
 ||| Static compiler proof witness verifying total mass budget matches Primorial 210 (27 + 55 + 128 = 210).
 public export
-0 verifyCosmicMassBudget : computeTotalCosmicMass Math.Cosmology.MacroEnvelope.initMacroCosmicEnvelope = intToBoxInt 210
+0 verifyCosmicMassBudget : computeTotalCosmicMass Stage1.Cosmology.MacroEnvelope.initMacroCosmicEnvelope = intToBoxInt 210
 verifyCosmicMassBudget = Refl
 
 --------------------------------------------------------------------------------
@@ -88,27 +118,27 @@ verifyCosmicMassBudget = Refl
 
 ||| Metrically bounded macro envelope mapping cosmological scale to chromogeometric color signature
 public export
-boundedMacroEnvelope : (dim : Nat) -> (color : Geometry.Applicative.MetricColor) -> MetricalEnvelope dim color Vexel
+boundedMacroEnvelope : (dim : Nat) -> (color : Stage0.Applicative.MetricColor) -> MetricalEnvelope dim color Vexel
 boundedMacroEnvelope dim color = pure initMacroCosmicEnvelope
 
 ||| Evaluates FLRW cosmological spacetime metric quadrance over a 4D Red Minkowski VexelSpace
 public export
 flrwCosmologicalMetric : (scaleFactor : BoxInt) -> (spatialVec : Vexel) -> BoxInt
 flrwCosmologicalMetric scaleFactor v =
-  quadranceVexelSpace (defaultSpace 4 Math.ChromoCategory.Red) v
+  quadranceVexelSpace (defaultSpace 4 Stage1.ChromoCategory.Red) v
 
 ||| Metrically bounded coarse-graining abstraction mapping concrete domain configurations to macro cosmic envelopes.
 ||| Guarantees isometric scale preservation over the background VexelSpace metric signature.
 public export
-metricalCoarseGrain : {dim : Nat} -> {color : Geometry.Applicative.MetricColor} -> 
+metricalCoarseGrain : {dim : Nat} -> {color : Stage0.Applicative.MetricColor} -> 
                       MetricalEnvelope dim color ConcreteDomain -> 
                       MetricalEnvelope dim color Vexel
 metricalCoarseGrain (BoxSpace space (MkConcrete c)) =
   BoxSpace space (macroCosmicVexel (intToBoxInt 1) (natToBoxInt c) (intToBoxInt 55) (intToBoxInt 128))
 
-||| Dynamically parameterized Galois coarse-graining abstraction with explicit scale factor and channel residues.
+||| Dynamically parameterized Multiset Scale coarse-graining abstraction with explicit scale factor and channel residues.
 public export
-metricalCoarseGrainWithScale : {dim : Nat} -> {color : Geometry.Applicative.MetricColor} -> 
+metricalCoarseGrainWithScale : {dim : Nat} -> {color : Stage0.Applicative.MetricColor} -> 
                                 (scale : BoxInt) -> 
                                 (darkRes : BoxInt) -> 
                                 (clustering : BoxInt) -> 
@@ -120,5 +150,5 @@ metricalCoarseGrainWithScale scale darkRes clustering (BoxSpace space (MkConcret
 ||| Static compiler verification proof proving that coarse-graining of initial baryonic matter (27)
 ||| preserves the Primorial 210 total mass budget.
 public export
-0 verifyMetricalCoarseGrainPreservesMass : computeTotalCosmicMass Math.Cosmology.MacroEnvelope.initMacroCosmicEnvelope = intToBoxInt 210
+0 verifyMetricalCoarseGrainPreservesMass : computeTotalCosmicMass Stage1.Cosmology.MacroEnvelope.initMacroCosmicEnvelope = intToBoxInt 210
 verifyMetricalCoarseGrainPreservesMass = Refl
