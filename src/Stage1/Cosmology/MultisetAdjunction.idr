@@ -4,9 +4,11 @@ import public Stage0.BoxInt
 import public Stage0.WitnessLedger
 import public Stage0.Multiset
 import public Stage1.QuadStream
-import public Stage1.Category.Adjunction
+import public Stage1.MultisetDuality
 import public Stage1.TypeTheory.Staging
 import public Stage1.TypeTheory.TwoLevel
+import public Stage0.Cosmology.MetricLawLedger
+import public Stage1.MetricSignature
 import Geometry
 import Data.Vect
 import Stage0.PreorderedMonoid
@@ -350,7 +352,7 @@ record CyclicCosmicEpoch where
   constructor MkCyclicEpoch
   epochNumber    : Nat
   concreteState  : ConcreteDomain
-  darkEnergyLaws : Multiset BoxInt String
+  darkEnergyLaws : CosmicMetricLedger
 
 public export
 Show CyclicCosmicEpoch where
@@ -362,7 +364,7 @@ collapseAndReboundEpoch : CyclicCosmicEpoch -> CyclicCosmicEpoch
 collapseAndReboundEpoch (MkCyclicEpoch ep (MkConcrete particleCount) darkEnergy) =
   let abstractState = f_pushforward {a=AbstractDomain} (MkConcrete particleCount)
       reboundState  = f_pullback {a=AbstractDomain} abstractState
-      updatedDark   = AddM "Alpha137" (intToBoxInt 1) (AddM "Jeans27" (intToBoxInt 1) darkEnergy)
+      updatedDark   = AddM ellipticSignature2D (intToBoxInt 1) (AddM hyperbolicSignature2D (intToBoxInt 1) darkEnergy)
   in MkCyclicEpoch (S ep) reboundState updatedDark
 
 ||| Static proof witness verifying physical law residue persistence across cyclic universe collapse.

@@ -1,5 +1,5 @@
 package FinSc-Cosmology
-version = 0.3.2
+version = 0.3.4
 authors = "Justin Kelly"
 brief   = "Layer 9 Multiset Adjunctions, Abstract Interpretation & Cosmological Scaling Subsystem."
 
@@ -7,6 +7,8 @@ depends = FinSc-Geometry, FinSc-Multiset-Core, FinSc-Multiset-Transform, FinSc-T
 sourcedir = "src"
 
 modules = Cosmology,
+          Cosmology.Stage0,
+          Cosmology.Stage1,
           Stage0.Cosmology.CapacityBudget,
           Stage0.Cosmology.MetricLawLedger,
           Stage0.Cosmology.StreamingCosmology,

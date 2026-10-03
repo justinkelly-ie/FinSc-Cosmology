@@ -7,6 +7,7 @@ import Stage0.Applicative
 import Stage1.MetricalBounds
 import Stage1.ChromoCategory
 import Stage1.QuadStream
+import Stage1.FourGeometries
 import Stage1.Cosmology.MultisetAdjunction
 
 %default total
@@ -53,7 +54,7 @@ macroClusteringH2O v = lookupUnixel (MkUnixel 3) v
 public export
 initMacroCosmicEnvelope : Vexel
 initMacroCosmicEnvelope =
-  macroCosmicVexel (intToBoxInt 1) (natToBoxInt (cast Stage1.FourGeometriesActions.ellipticLatticeCapacity)) (natToBoxInt (cast Stage1.FourGeometriesActions.darkMatterTriangularResidue)) (natToBoxInt (cast Stage1.FourGeometriesActions.hyperbolicRomCapacity))
+  macroCosmicVexel (intToBoxInt 1) (natToBoxInt Stage1.FourGeometries.ellipticLatticeCapacity) (natToBoxInt Stage1.FourGeometries.darkMatterTriangularResidue) (natToBoxInt Stage1.FourGeometries.hyperbolicRomCapacity)
 
 ||| QuadStream representation of cosmological fluid envelope:
 |||   ellipticStream   : Baryonic Matter (27 states)
@@ -72,7 +73,7 @@ macroCosmicQuadStream scale baryon dark cluster =
 public export
 initMacroCosmicQuadStream : QuadStreamMultiset BoxInt
 initMacroCosmicQuadStream =
-  macroCosmicQuadStream (intToBoxInt 1) (natToBoxInt (cast Stage1.FourGeometriesActions.ellipticLatticeCapacity)) (natToBoxInt (cast Stage1.FourGeometriesActions.darkMatterTriangularResidue)) (natToBoxInt (cast Stage1.FourGeometriesActions.hyperbolicRomCapacity))
+  macroCosmicQuadStream (intToBoxInt 1) (natToBoxInt Stage1.FourGeometries.ellipticLatticeCapacity) (natToBoxInt Stage1.FourGeometries.darkMatterTriangularResidue) (natToBoxInt Stage1.FourGeometries.hyperbolicRomCapacity)
 
 ||| Computes total cosmic mass aggregated across QuadStream sectors (27 + 55 + 128 = 210).
 public export

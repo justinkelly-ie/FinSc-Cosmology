@@ -28,19 +28,34 @@
 
 ### Module Breakdown
 
-#### 1. `Stage1.Cosmology.MultisetAdjunction`
-- **`MultisetScaleAdjunction concrete abstractDomain` Interface:** Formalizes abstraction map `alpha : C -> A`, concretization map `gamma : A -> C`, and widening operator `widenNabla` for abstract interpretation.
-- **`ConcreteDomain` & `AbstractDomain`:** Pre-ordered monoid state spaces for micro-particle counting (`MkConcrete particleCount`) and interval bounding (`MkAbstract upperBound`).
-- **`verifyGaloisIdentity : gamma (alpha c) = c`**: Static compiler proof witness verifying Multiset Scale Adjunction identity.
+#### Tiered Facades
+- **`Cosmology`**: Primary entrypoint re-exporting `Cosmology.Stage0` and `Cosmology.Stage1`.
+- **`Cosmology.Stage0`**: Stage0 primitives: `CapacityBudget`, `MetricLawLedger`, `StreamingCosmology`.
+- **`Cosmology.Stage1`**: Stage1 abstractions and adjunctions: `MultisetAdjunction`, `MacroEnvelope`.
 
-#### 2. `Math.Cosmology.MacroEnvelope`
-- **`MacroCosmicEnvelope`**: Record representing macro cosmological fluid states with `scaleFactor : BoxInt`, `baryonMass : BoxInt`, `darkResidue : BoxInt`, and `clusteringH2O : BoxInt`.
-- **`initMacroCosmicEnvelope`**: Initial Primorial 210 budget ($1 \text{ scale}, 27 \text{ Baryon}, 55 \text{ Dark}, 128 \text{ H}_2\text{O}$).
-- **`computeTotalCosmicMass : MacroCosmicEnvelope -> BoxInt`**: Total galaxy-scale mass calculation ($M_{\text{Total}} = B + D + C$).
-- **`isStarFormationAllowed : MacroCosmicEnvelope -> Bool`**: Jeans mass threshold check ($B \ge 27$).
-- **`metricalCoarseGrain`**: Metrically bounded coarse-graining mapping concrete configurations to macro cosmic envelopes while preserving spatial metric color signatures.
-- **`metricalCoarseGrainWithScale`**: Dynamically parameterized coarse-graining abstraction with explicit scale factor and channel residues.
-- **`verifyCosmicMassBudget` & `verifyMetricalCoarseGrainPreservesMass`**: Compile-time static proof witnesses auditing mass conservation.
+#### Stage 0 (Core Primitives & Streaming Transducers)
+1. **`Stage0.Cosmology.CapacityBudget`**:
+   - `CosmicCapacityBudget`: Bounded cosmological capacity tracker across baryon, dark, and H₂O channels.
+   - Exact conservation proofs: `verifyBaryonCapacityBound`, `verifyCosmicCapacityPartition`.
+2. **`Stage0.Cosmology.MetricLawLedger`**:
+   - `CosmicMetricLedger`: Law accumulator across chromatic metric signatures (`Elliptic`, `Hyperbolic`, `Parabolic`, `Substrate`) via `FourGeometries`.
+   - `recordCosmicMetricObservation`: Pushforward accumulator preserving metric purity.
+3. **`Stage0.Cosmology.StreamingCosmology`**:
+   - `fusedComputeCosmicLawAccumulationNat`: Inductive `Nat`-fuel bounded stream transducer for total cosmological execution.
+   - `auditStreamingCosmologyProof`: Verified totality proofs for streaming cosmological accumulation.
+
+#### Stage 1 (Adjunctions & Macro Envelopes)
+1. **`Stage1.Cosmology.MultisetAdjunction`**:
+   - `MultisetScaleAdjunction concrete abstractDomain`: Formalizes abstraction map `alpha : C -> A`, concretization map `gamma : A -> C`, and widening operator `widenNabla`.
+   - `ConcreteDomain` & `AbstractDomain`: Pre-ordered monoid state spaces for micro-particle counting and interval bounding.
+   - `verifyGaloisIdentity : gamma (alpha c) = c`: Verified reflection witness across multiset scale adjunctions.
+2. **`Stage1.Cosmology.MacroEnvelope`**:
+   - `MacroCosmicEnvelope`: Macro cosmological fluid states with `scaleFactor : BoxInt`, `baryonMass : BoxInt`, `darkResidue : BoxInt`, and `clusteringH2O : BoxInt`.
+   - `initMacroCosmicEnvelope`: Primorial 210 budget ($1 \text{ scale}, 27 \text{ Baryon}, 55 \text{ Dark}, 128 \text{ H}_2\text{O}$).
+   - `computeTotalCosmicMass : MacroCosmicEnvelope -> BoxInt`: Exact total mass calculation ($M_{\text{Total}} = B + D + C$).
+   - `isStarFormationAllowed : MacroCosmicEnvelope -> Bool`: Jeans mass threshold check ($B \ge 27$).
+   - `metricalCoarseGrain`: Metrically bounded coarse-graining mapping concrete configurations to macro cosmic envelopes preserving spatial metric signatures.
+   - `verifyCosmicMassBudget` & `verifyMetricalCoarseGrainPreservesMass`: Compile-time static proof witnesses auditing mass conservation.
 
 ---
 

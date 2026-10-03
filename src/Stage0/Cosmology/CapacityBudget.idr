@@ -5,6 +5,7 @@ import public Stage0.WitnessLedger
 import public Stage0.Multiset
 import public Stage2.ThreeLevel
 import public Stage0.Cosmology.MetricLawLedger
+import public Stage0.UniverseState
 
 %default total
 
@@ -42,6 +43,16 @@ Show CapacityBudget where
 %inline public export
 totalCapacity : CapacityBudget -> Nat
 totalCapacity (MkCapacityBudget vm de dm) = vm + de + dm
+
+||| Projects a canonical UniverseState into a CapacityBudget view.
+%inline public export
+universeToCapacityBudget : {vm, de, dm : Nat} -> UniverseState vm de dm -> CapacityBudget
+universeToCapacityBudget _ = MkCapacityBudget vm de dm
+
+||| Canonical Observer Epoch 37 Capacity Budget projection from UniverseState 27 128 55.
+%inline public export
+observerUniverseCapacityBudget : CapacityBudget
+observerUniverseCapacityBudget = universeToCapacityBudget (seedCosmicVacuum 27 128 55)
 
 --------------------------------------------------------------------------------
 -- 3. DYNAMIC BARYOGENESIS & LAW ACCUMULATION TRAJECTORY

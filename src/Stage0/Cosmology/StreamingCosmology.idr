@@ -22,7 +22,7 @@ quadStreamToCosmicEpoch : QuadStreamMultiset BoxInt -> CyclicCosmicEpoch
 quadStreamToCosmicEpoch (MkQuadStream e h p s) =
   let stepIdx = cast (unwrapBox (multisetSum e))
       matterMass = cast (unwrapBox (multisetSum p))
-      darkLaws = AddM "Alpha137" (multisetSum h) ZeroM
+      darkLaws = AddM hyperbolicSignature2D (multisetSum h) ZeroM
   in MkCyclicEpoch stepIdx (MkConcrete matterMass) darkLaws
 
 ||| Constructive OnSeq mapping term index n to CyclicCosmicEpoch trajectory.
@@ -62,7 +62,7 @@ fusedQuadStreamCosmologyPipeline f seedQs =
             ep' = collapseAndReboundEpoch ep
             vm = natToBoxInt ep'.concreteState.particleCount
             de = intToBoxInt 128
-            dm = multiplicity "Alpha137" ep'.darkEnergyLaws
+            dm = multiplicity hyperbolicSignature2D ep'.darkEnergyLaws
         in MkQuadStream (AddM (intToBoxInt 1) vm ZeroM)
                         (AddM (intToBoxInt 1) de ZeroM)
                         ZeroM
@@ -77,19 +77,32 @@ fusedComputeCosmicLawAccumulation f seedEpoch =
     (\(curr, ep) =>
        let ep' = collapseAndReboundEpoch ep
        in Yield ep (S curr, ep'))
-    (\ep, acc => multiplicity "Alpha137" ep.darkEnergyLaws + acc)
+    (\ep, acc => multiplicity hyperbolicSignature2D ep.darkEnergyLaws + acc)
     (intToBoxInt 0)
     (1, seedEpoch)
+
+||| Total Nat fuel-bounded accumulated dark energy law count across N cosmic steps.
+public export
+fusedComputeCosmicLawAccumulationNat : (fuel : Nat) -> CyclicCosmicEpoch -> BoxInt
+fusedComputeCosmicLawAccumulationNat Z _ = intToBoxInt 0
+fusedComputeCosmicLawAccumulationNat (S f) seedEpoch =
+  loop f (1, seedEpoch) (intToBoxInt 0)
+  where
+    loop : Nat -> (Nat, CyclicCosmicEpoch) -> BoxInt -> BoxInt
+    loop Z _ acc = acc
+    loop (S k) (curr, ep) acc =
+      let ep' = collapseAndReboundEpoch ep
+      in loop k (S curr, ep') (multiplicity hyperbolicSignature2D ep.darkEnergyLaws + acc)
 
 --------------------------------------------------------------------------------
 -- 3. AUDIT PROOF WITNESS
 --------------------------------------------------------------------------------
 
 ||| Audit witness verifying deforested streaming cosmology execution.
-public export covering
+public export
 auditStreamingCosmologyProof : Bool
 auditStreamingCosmologyProof =
   let initEp = MkCyclicEpoch 1 (MkConcrete 27) ZeroM
       clip = getCosmologyClip initEp 0 3
-      lawsCount = fusedComputeCosmicLawAccumulation (limit 5) initEp
+      lawsCount = fusedComputeCosmicLawAccumulationNat 5 initEp
   in length (elements clip) == 3 && unwrapBox lawsCount >= 0
