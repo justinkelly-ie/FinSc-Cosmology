@@ -1,7 +1,7 @@
 [package]
-name = "FinSc-Cosmology"
+name = "FinSc-Cosmic-Horizon"
 version = "0.3.4"
-ipkg = "FinSc-Cosmology.ipkg"
+ipkg = "FinSc-Cosmic-Horizon.ipkg"
 
 [custom.all.FinSc-Multiset-Core]
 type = "local"
