@@ -164,8 +164,9 @@ StrictReflectionFunctor ConcreteScaleFunctor AbstractScaleFunctor where
 
 ||| QTT 0 Erased Proof: Cosmology Multiset Adjunction Duality Invariant
 public export
-0 prfCosmologyAdjunctionDuality : (n : BoxInt) -> n = n
-prfCosmologyAdjunctionDuality = prfMultisetDuality
+0 prfCosmologyAdjunctionDuality : (t : MultisetTensor (ConcreteScaleFunctor a) b) ->
+                                  scaleHomTensorInv (scaleHomTensorIso t) = t
+prfCosmologyAdjunctionDuality = proofHomIso
 
 ||| Widening operator nabla for abstract interpretation over metrical envelopes
 ||| enforcing isometric scale expansion under PreservesMetric.
