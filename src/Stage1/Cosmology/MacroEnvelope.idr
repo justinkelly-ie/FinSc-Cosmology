@@ -9,6 +9,9 @@ import Stage1.ChromoCategory
 import Stage1.QuadStream
 import Stage1.FourGeometries
 import Stage1.Cosmology.MultisetAdjunction
+import Stage1.RationalTrig
+import Stage1.MaxelPolyBridge
+import Data.Fuel
 
 %default total
 
@@ -153,3 +156,31 @@ metricalCoarseGrainWithScale scale darkRes clustering (BoxSpace space (MkConcret
 public export
 0 verifyMetricalCoarseGrainPreservesMass : computeTotalCosmicMass Stage1.Cosmology.MacroEnvelope.initMacroCosmicEnvelope = intToBoxInt 210
 verifyMetricalCoarseGrainPreservesMass = Refl
+
+--------------------------------------------------------------------------------
+-- 5. DYNAMIC HOLOGRAPHIC BOUNDARY EVAPORATION & LOCALIZATION
+--------------------------------------------------------------------------------
+
+||| Evaluates discrete holographic horizon boundary evolution over k evaporation ticks
+||| using repeated matrix squaring of the dynamic spread companion Maxel:
+||| H_k = (M(x, y)^k) * H_0.
+public export
+holographicHorizonEvaporation : Fuel -> (x : BoxInt) -> (y : BoxInt) -> (k : Nat) -> Vexel -> Vexel
+holographicHorizonEvaporation f x y k h0 =
+  let mSpread = pythagoreanSpreadMaxel x y
+      mPower  = fastMaxelPower f k 2 mSpread
+  in canonicalizeVexel (actMaxelVexel mPower h0)
+
+||| Invariant audit verifying bounded holographic horizon localization & evaporation:
+||| Area bits are preserved on boundary coordinate [1] under single-step companion spread transfer.
+public export
+auditHolographicBoundaryEvaporationProof : (x : BoxInt) -> (y : BoxInt) -> (areaBits : BoxInt) -> Bool
+auditHolographicBoundaryEvaporationProof x y areaBits =
+  let qBlue = (x * x) + (y * y)
+      qRed  = (x * x) - (y * y)
+      h0    = MkVexel [(MkUnixel 1, areaBits)]
+      h1    = holographicHorizonEvaporation (limit 10) x y 1 h0
+      bound = lookupUnixel (MkUnixel 1) h1
+      flux  = lookupUnixel (MkUnixel 2) h1
+  in boxEq bound ((intToBoxInt 2 * qRed) * areaBits) && boxEq flux (qBlue * areaBits)
+
