@@ -14,4 +14,5 @@ modules = CosmicHorizon,
           Stage0.Cosmology.MetricLawLedger,
           Stage0.Cosmology.StreamingCosmology,
           Stage1.Cosmology.MultisetAdjunction,
-          Stage1.Cosmology.MacroEnvelope
+          Stage1.Cosmology.MacroEnvelope,
+          Reflect.CosmicHorizonAuditor
