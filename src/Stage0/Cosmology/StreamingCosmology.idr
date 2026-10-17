@@ -84,17 +84,18 @@ fusedQuadStreamCosmologyPipeline f seedQs =
 public export
 fusedQuadStreamCosmologyPipelineFuelModel : GohFuel cap -> QuadStreamMultiset BoxInt -> FusedStream (QuadStreamMultiset BoxInt)
 fusedQuadStreamCosmologyPipelineFuelModel fuel seedQs =
-  let cosmoStep = \qs =>
-        let ep = quadStreamToCosmicEpoch qs
-            ep' = collapseAndReboundEpoch ep
-            vm = natToBoxInt ep'.concreteState.particleCount
-            de = intToBoxInt 128
-            dm = multiplicity hyperbolicSignature2D ep'.darkEnergyLaws
-        in MkQuadStream (AddM (intToBoxInt 1) vm ZeroM)
-                        (AddM (intToBoxInt 1) de ZeroM)
-                        ZeroM
-                        (AddM (intToBoxInt 1) dm ZeroM)
-  in fusedQuadStreamPipeline (limit (gohSteps fuel)) cosmoStep seedQs
+  MkStream (\(curr, qs) =>
+    let ep = quadStreamToCosmicEpoch qs
+        ep' = collapseAndReboundEpoch ep
+        vm = natToBoxInt ep'.concreteState.particleCount
+        de = intToBoxInt 128
+        dm = multiplicity hyperbolicSignature2D ep'.darkEnergyLaws
+        qs' = MkQuadStream (AddM (intToBoxInt 1) vm ZeroM)
+                           (AddM (intToBoxInt 1) de ZeroM)
+                           ZeroM
+                           (AddM (intToBoxInt 1) dm ZeroM)
+    in Yield qs (S curr, qs')
+  ) (1, seedQs)
 
 ||| Evaluates total accumulated dark energy law count across N cosmic steps over Fuel.
 public export
@@ -186,7 +187,7 @@ auditPageCurveEvaporationProof : Bool
 auditPageCurveEvaporationProof =
   let initialArea = intToBoxInt 16
       evapStrm = streamPageCurveEvaporation initialArea
-      tokens = runFueledStream (limit 4) evapStrm
+      tokens = runFueledStreamNat 4 evapStrm
       entropies = map (\t => unwrapBox (radiationEntropy t)) tokens
   in entropies == [1, 2, 1, 0]
 
@@ -234,7 +235,7 @@ auditDyckPageCurveHolographyProof : Bool
 auditDyckPageCurveHolographyProof =
   let a0 = intToBoxInt 16
       strm = streamDyckHorizonEvaporation a0
-      steps = runFueledStream (limit 4) strm
+      steps = runFueledStreamNat 4 strm
   in length steps == 4 && dyckStepsValid 4 steps
 
 
