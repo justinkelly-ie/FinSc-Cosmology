@@ -8,6 +8,7 @@ import Stage0.OnSeq.FusedStream
 import Stage1.OnSeq
 import Stage1.Cosmology.MultisetAdjunction
 import Stage0.Cosmology.CapacityBudget
+import Stage0.StructuralFuel
 import Data.Fuel
 
 %default total
@@ -53,6 +54,16 @@ fusedCosmologyStream f seedEpoch = MkStream nextStep (1, seedEpoch)
       let ep' = collapseAndReboundEpoch ep
       in Yield ep (S curr, ep')
 
+||| Deforested stream transducer advancing CyclicCosmicEpoch states over model-indexed GohFuel.
+public export
+fusedCosmologyStreamFuelModel : GohFuel cap -> CyclicCosmicEpoch -> FusedStream CyclicCosmicEpoch
+fusedCosmologyStreamFuelModel _ seedEpoch = MkStream nextStep (1, seedEpoch)
+  where
+    nextStep : (Nat, CyclicCosmicEpoch) -> Step (Nat, CyclicCosmicEpoch) CyclicCosmicEpoch
+    nextStep (curr, ep) =
+      let ep' = collapseAndReboundEpoch ep
+      in Yield ep (S curr, ep')
+
 ||| Deforested Quad-Stream pipeline for Cosmology law dynamics over Fuel.
 public export
 fusedQuadStreamCosmologyPipeline : Fuel -> QuadStreamMultiset BoxInt -> FusedStream (QuadStreamMultiset BoxInt)
@@ -68,6 +79,22 @@ fusedQuadStreamCosmologyPipeline f seedQs =
                         ZeroM
                         (AddM (intToBoxInt 1) dm ZeroM)
   in fusedQuadStreamPipeline f cosmoStep seedQs
+
+||| Deforested Quad-Stream pipeline for Cosmology law dynamics over model-indexed GohFuel.
+public export
+fusedQuadStreamCosmologyPipelineFuelModel : GohFuel cap -> QuadStreamMultiset BoxInt -> FusedStream (QuadStreamMultiset BoxInt)
+fusedQuadStreamCosmologyPipelineFuelModel fuel seedQs =
+  let cosmoStep = \qs =>
+        let ep = quadStreamToCosmicEpoch qs
+            ep' = collapseAndReboundEpoch ep
+            vm = natToBoxInt ep'.concreteState.particleCount
+            de = intToBoxInt 128
+            dm = multiplicity hyperbolicSignature2D ep'.darkEnergyLaws
+        in MkQuadStream (AddM (intToBoxInt 1) vm ZeroM)
+                        (AddM (intToBoxInt 1) de ZeroM)
+                        ZeroM
+                        (AddM (intToBoxInt 1) dm ZeroM)
+  in fusedQuadStreamPipeline (limit (gohSteps fuel)) cosmoStep seedQs
 
 ||| Evaluates total accumulated dark energy law count across N cosmic steps over Fuel.
 public export
@@ -94,6 +121,13 @@ fusedComputeCosmicLawAccumulationNat (S f) seedEpoch =
     loop (S k) (curr, ep) acc =
       let ep' = collapseAndReboundEpoch ep
       in loop k (S curr, ep') (multiplicity hyperbolicSignature2D ep.darkEnergyLaws + acc)
+
+||| Evaluates total accumulated dark energy law count across cosmic steps using model-indexed GohFuel.
+public export
+fusedComputeCosmicLawAccumulationFuelModel : GohFuel cap -> CyclicCosmicEpoch -> BoxInt
+fusedComputeCosmicLawAccumulationFuelModel fuel seedEpoch =
+  fusedComputeCosmicLawAccumulationNat (gohSteps fuel) seedEpoch
+
 
 --------------------------------------------------------------------------------
 -- 3. AUDIT PROOF WITNESS

@@ -11,6 +11,7 @@ import Stage1.FourGeometries
 import Stage1.Cosmology.MultisetAdjunction
 import Stage1.RationalTrig
 import Stage1.MaxelPolyBridge
+import Stage0.StructuralFuel
 import Data.Fuel
 
 %default total
@@ -171,15 +172,26 @@ holographicHorizonEvaporation f x y k h0 =
       mPower  = fastMaxelPower f k 2 mSpread
   in canonicalizeVexel (actMaxelVexel mPower h0)
 
+||| Evaluates discrete holographic horizon boundary evolution over k evaporation ticks
+||| using repeated matrix squaring of the dynamic spread companion Maxel with model-indexed GohFuel:
+||| H_k = (M(x, y)^k) * H_0.
+public export
+holographicHorizonEvaporationFuelModel : GohFuel cap -> (x : BoxInt) -> (y : BoxInt) -> (k : Nat) -> Vexel -> Vexel
+holographicHorizonEvaporationFuelModel fuel x y k h0 =
+  let mSpread = pythagoreanSpreadMaxel x y
+      mPower  = fastMaxelPowerNat (gohSteps fuel) k 2 mSpread
+  in canonicalizeVexel (actMaxelVexel mPower h0)
+
 ||| Invariant audit verifying bounded holographic horizon localization & evaporation:
 ||| Area bits are preserved on boundary coordinate [1] under single-step companion spread transfer.
+||| Fuel is grounded in the 2D holographic boundary area 6L^2 = 54 (Law 13, Rule 03, Item 3).
 public export
 auditHolographicBoundaryEvaporationProof : (x : BoxInt) -> (y : BoxInt) -> (areaBits : BoxInt) -> Bool
 auditHolographicBoundaryEvaporationProof x y areaBits =
   let qBlue = (x * x) + (y * y)
       qRed  = (x * x) - (y * y)
       h0    = MkVexel [(MkUnixel 1, areaBits)]
-      h1    = holographicHorizonEvaporation (limit 10) x y 1 h0
+      h1    = holographicHorizonEvaporationFuelModel (gohFuelForCapacity 54) x y 1 h0
       bound = lookupUnixel (MkUnixel 1) h1
       flux  = lookupUnixel (MkUnixel 2) h1
   in boxEq bound ((intToBoxInt 2 * qRed) * areaBits) && boxEq flux (qBlue * areaBits)
