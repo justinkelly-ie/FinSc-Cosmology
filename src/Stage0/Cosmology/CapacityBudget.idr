@@ -6,21 +6,12 @@ import public Stage0.Multiset
 import public Stage2.ThreeLevel
 import public Stage0.Cosmology.MetricLawLedger
 import public Stage0.UniverseState
+import public Stage1.FourGeometries
 
 %default total
 
 --------------------------------------------------------------------------------
--- 1. MONOMORPHIC NAT POWER & MATH HELPERS
---------------------------------------------------------------------------------
-
-||| Monomorphic Nat exponentiation.
-%inline public export
-powerNat : Nat -> Nat -> Nat
-powerNat base 0 = 1
-powerNat base (S k) = base * powerNat base k
-
---------------------------------------------------------------------------------
--- 2. DYNAMIC COSMOLOGICAL CAPACITY BUDGET BY EPOCH
+-- 1. DYNAMIC COSMOLOGICAL CAPACITY BUDGET BY EPOCH
 --------------------------------------------------------------------------------
 
 ||| Structural Cosmological Capacity Budget tracking partition allocation across
@@ -62,7 +53,7 @@ observerUniverseCapacityBudget = universeToCapacityBudget (seedCosmicVacuum 27 1
 %inline public export
 vmMaxelsAtEpoch : Nat -> Nat
 vmMaxelsAtEpoch ep =
-  if ep <= 1 then 0 else powerNat 3 3
+  if ep <= 1 then 0 else ellipticLatticeCapacity
 
 ||| Evaluates dark matter metric law count for epoch ep (0 at Genesis -> 55 at Epoch 37).
 %inline public export
@@ -80,7 +71,7 @@ dmLawsAtEpoch ep =
 epochCapacityBudget : (ep : Nat) -> CapacityBudget
 epochCapacityBudget ep =
   let vm = vmMaxelsAtEpoch ep
-      de = powerNat 2 7   -- constant 128 dyadic boxel background
+      de = hyperbolicRomCapacity   -- constant 128 dyadic boxel background
       dm = dmLawsAtEpoch ep
   in MkCapacityBudget vm de dm
 
