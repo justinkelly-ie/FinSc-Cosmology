@@ -3,6 +3,7 @@ module Stage1.Cosmology.MacroEnvelope
 import Stage0.BoxInt
 import Stage1.UnixelFraction
 import Stage1.VexelMaxel
+import Stage1.MultisetTree
 import Stage0.Applicative
 import Stage1.MetricalBounds
 import Stage1.ChromoCategory
@@ -28,30 +29,26 @@ import Data.Fuel
 public export
 macroCosmicVexel : BoxInt -> BoxInt -> BoxInt -> BoxInt -> Vexel
 macroCosmicVexel s b d c =
-  MkVexel [ (MkUnixel 0, s)
-          , (MkUnixel 1, b)
-          , (MkUnixel 2, d)
-          , (MkUnixel 3, c)
-          ]
+  let n0 = BoxNode 1 BoxLeaf (MkUnixel 0) s BoxLeaf
+      n3 = BoxNode 1 BoxLeaf (MkUnixel 3) c BoxLeaf
+      n2 = BoxNode 2 BoxLeaf (MkUnixel 2) d n3
+      root = BoxNode 3 n0 (MkUnixel 1) b n2
+  in MkVexelTree root
 
 public export
 macroScaleFactor : Vexel -> BoxInt
-macroScaleFactor (MkVexel ((MkUnixel 0, s) :: _)) = s
 macroScaleFactor v = lookupUnixel (MkUnixel 0) v
 
 public export
 macroBaryonMass : Vexel -> BoxInt
-macroBaryonMass (MkVexel (_ :: (MkUnixel 1, b) :: _)) = b
 macroBaryonMass v = lookupUnixel (MkUnixel 1) v
 
 public export
 macroDarkResidue : Vexel -> BoxInt
-macroDarkResidue (MkVexel (_ :: _ :: (MkUnixel 2, d) :: _)) = d
 macroDarkResidue v = lookupUnixel (MkUnixel 2) v
 
 public export
 macroClusteringH2O : Vexel -> BoxInt
-macroClusteringH2O (MkVexel (_ :: _ :: _ :: (MkUnixel 3, c) :: _)) = c
 macroClusteringH2O v = lookupUnixel (MkUnixel 3) v
 
 ||| Initial cosmic budget initialization: Primorial 210 decomposition (27 + 128 + 55)
