@@ -234,9 +234,9 @@ auditEddingtonCosmicMultisetProof : Bool
 auditEddingtonCosmicMultisetProof =
   let pureCount = multiplicity GatePureCycle eddingtonCosmicTrajectory
       decoCount = multiplicity DecoherentCycle eddingtonCosmicTrajectory
-  in unwrapBox pureCount == cast gatePureScaleCount &&
-     unwrapBox decoCount == cast decoherentScaleCount &&
-     unwrapBox (pureCount + decoCount) == cast totalCosmicScaleHierarchy
+  in pureCount == natToBoxInt gatePureScaleCount &&
+     decoCount == natToBoxInt decoherentScaleCount &&
+     (pureCount + decoCount) == natToBoxInt totalCosmicScaleHierarchy
 
 --------------------------------------------------------------------------------
 -- 3B. 2D SPECTRAL SPACE TO 3D MANIFEST SPACE MÖBIUS MULTISET ADJUNCTION (L_Spectral ⊣ R_Manifest)

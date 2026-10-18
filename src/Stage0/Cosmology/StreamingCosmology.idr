@@ -21,8 +21,8 @@ import Data.Fuel
 public export
 quadStreamToCosmicEpoch : QuadStreamMultiset BoxInt -> CyclicCosmicEpoch
 quadStreamToCosmicEpoch (MkQuadStream e h p s) =
-  let stepIdx = cast (unwrapBox (multisetSum e))
-      matterMass = cast (unwrapBox (multisetSum p))
+  let stepIdx = boxToNat (multisetSum e)
+      matterMass = boxToNat (multisetSum p)
       darkLaws = AddM hyperbolicSignature2D (multisetSum h) ZeroM
   in MkCyclicEpoch stepIdx (MkConcrete matterMass) darkLaws
 
@@ -141,7 +141,7 @@ auditStreamingCosmologyProof =
   let initEp = MkCyclicEpoch 1 (MkConcrete 27) ZeroM
       clip = getCosmologyClip initEp 0 3
       lawsCount = fusedComputeCosmicLawAccumulationNat 5 initEp
-  in length (elements clip) == 3 && unwrapBox lawsCount >= 0
+  in length (elements clip) == 3 && lawsCount >= intToBoxInt 0
 
 --------------------------------------------------------------------------------
 -- 4. COINDUCTIVE PAGE CURVE & UNITARY BLACK HOLE EVAPORATION
@@ -170,7 +170,7 @@ streamPageCurveEvaporation a0 =
   where
     stepEmission : (BoxInt, BoxInt) -> Step (BoxInt, BoxInt) HawkingRadiationToken
     stepEmission (currArea, currEntr) =
-      if unwrapBox currArea <= 0
+      if currArea <= intToBoxInt 0
         then Done
         else
           let nextArea = subBox currArea (intToBoxInt 4)
@@ -188,8 +188,8 @@ auditPageCurveEvaporationProof =
   let initialArea = intToBoxInt 16
       evapStrm = streamPageCurveEvaporation initialArea
       tokens = runFueledStreamNat 4 evapStrm
-      entropies = map (\t => unwrapBox (radiationEntropy t)) tokens
-  in entropies == [1, 2, 1, 0]
+      entropies = map (\t => radiationEntropy t) tokens
+  in entropies == [intToBoxInt 1, intToBoxInt 2, intToBoxInt 1, intToBoxInt 0]
 
 --------------------------------------------------------------------------------
 -- 5. COINDUCTIVE DYCK-HUFFMAN HORIZON EVAPORATION
@@ -206,7 +206,7 @@ streamDyckHorizonEvaporation a0 =
   where
     stepDyck : (Nat, BoxInt, BoxInt) -> Step (Nat, BoxInt, BoxInt) (Nat, BoxInt, BoxInt)
     stepDyck (step, currArea, currEntr) =
-      if unwrapBox currArea <= 0
+      if currArea <= intToBoxInt 0
         then Done
         else
           let nextStep = S step
@@ -219,12 +219,12 @@ streamDyckHorizonEvaporation a0 =
           in Yield res (nextStep, nextArea, nextEntr)
 
 ||| Monomorphic step auditor verifying Dyck path bounds and termination at (0, 0).
-dyckStepsValid : Integer -> List (Nat, BoxInt, BoxInt) -> Bool
+dyckStepsValid : BoxInt -> List (Nat, BoxInt, BoxInt) -> Bool
 dyckStepsValid maxB [] = False
 dyckStepsValid maxB [(n, a, s)] =
-  unwrapBox a == 0 && unwrapBox s == 0 && unwrapBox s <= maxB && unwrapBox s >= 0
+  boxIsZero a && boxIsZero s && s <= maxB && s >= intToBoxInt 0
 dyckStepsValid maxB ((n, a, s) :: rest) =
-  if unwrapBox s >= 0 && unwrapBox s <= maxB
+  if s >= intToBoxInt 0 && s <= maxB
     then dyckStepsValid maxB rest
     else False
 
@@ -236,6 +236,6 @@ auditDyckPageCurveHolographyProof =
   let a0 = intToBoxInt 16
       strm = streamDyckHorizonEvaporation a0
       steps = runFueledStreamNat 4 strm
-  in length steps == 4 && dyckStepsValid 4 steps
+  in length steps == 4 && dyckStepsValid (intToBoxInt 4) steps
 
 
