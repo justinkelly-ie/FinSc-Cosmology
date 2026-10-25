@@ -2,8 +2,10 @@ module Stage1.Cosmology.MacroEnvelope
 
 import Stage0.BoxInt
 import Stage1.UnixelFraction
-import Stage1.VexelMaxel
 import Stage1.MultisetTree
+import Stage1.Carrier.Vexel
+import Stage1.Carrier.Maxel
+import Stage1.Basis.Coordinate
 import Stage0.Applicative
 import Stage1.MetricalBounds
 import Stage1.ChromoCategory
