@@ -3,8 +3,6 @@ module Stage1.Cosmology.MacroEnvelope
 import Stage0.BoxInt
 import Stage1.UnixelFraction
 import Stage1.MultisetTree
-import Stage1.Carrier.Vexel
-import Stage1.Carrier.Maxel
 import Stage1.Basis.Coordinate
 import Stage0.Applicative
 import Stage1.MetricalBounds
@@ -31,27 +29,26 @@ import Data.Fuel
 public export
 macroCosmicVexel : BoxInt -> BoxInt -> BoxInt -> BoxInt -> Vexel
 macroCosmicVexel s b d c =
-  let n0 = BoxNode 1 BoxLeaf (MkUnixel 0) s BoxLeaf
-      n3 = BoxNode 1 BoxLeaf (MkUnixel 3) c BoxLeaf
-      n2 = BoxNode 2 BoxLeaf (MkUnixel 2) d n3
-      root = BoxNode 3 n0 (MkUnixel 1) b n2
-  in MkVexelTree root
+  singletonCell (mkCell1 0) s <+>
+  singletonCell (mkCell1 1) b <+>
+  singletonCell (mkCell1 2) d <+>
+  singletonCell (mkCell1 3) c
 
 public export
 macroScaleFactor : Vexel -> BoxInt
-macroScaleFactor v = lookupUnixel (MkUnixel 0) v
+macroScaleFactor v = lookupCellMultiset (mkCell1 0) v
 
 public export
 macroBaryonMass : Vexel -> BoxInt
-macroBaryonMass v = lookupUnixel (MkUnixel 1) v
+macroBaryonMass v = lookupCellMultiset (mkCell1 1) v
 
 public export
 macroDarkResidue : Vexel -> BoxInt
-macroDarkResidue v = lookupUnixel (MkUnixel 2) v
+macroDarkResidue v = lookupCellMultiset (mkCell1 2) v
 
 public export
 macroClusteringH2O : Vexel -> BoxInt
-macroClusteringH2O v = lookupUnixel (MkUnixel 3) v
+macroClusteringH2O v = lookupCellMultiset (mkCell1 3) v
 
 ||| Initial cosmic budget initialization: Primorial 210 decomposition (27 + 128 + 55)
 public export
@@ -169,7 +166,7 @@ holographicHorizonEvaporation : Fuel -> (x : BoxInt) -> (y : BoxInt) -> (k : Nat
 holographicHorizonEvaporation f x y k h0 =
   let mSpread = pythagoreanSpreadMaxel x y
       mPower  = fastMaxelPower f k 2 mSpread
-  in canonicalizeVexel (actMaxelVexel mPower h0)
+  in canonicalizeCell (actMaxelVexel mPower h0)
 
 ||| Evaluates discrete holographic horizon boundary evolution over k evaporation ticks
 ||| using repeated matrix squaring of the dynamic spread companion Maxel with model-indexed GohFuel:
@@ -179,7 +176,7 @@ holographicHorizonEvaporationFuelModel : GohFuel cap -> (x : BoxInt) -> (y : Box
 holographicHorizonEvaporationFuelModel fuel x y k h0 =
   let mSpread = pythagoreanSpreadMaxel x y
       mPower  = fastMaxelPowerNat (gohSteps fuel) k 2 mSpread
-  in canonicalizeVexel (actMaxelVexel mPower h0)
+  in canonicalizeCell (actMaxelVexel mPower h0)
 
 ||| Invariant audit verifying bounded holographic horizon localization & evaporation:
 ||| Area bits are preserved on boundary coordinate [1] under single-step companion spread transfer.
@@ -189,9 +186,9 @@ auditHolographicBoundaryEvaporationProof : (x : BoxInt) -> (y : BoxInt) -> (area
 auditHolographicBoundaryEvaporationProof x y areaBits =
   let qBlue = (x * x) + (y * y)
       qRed  = (x * x) - (y * y)
-      h0    = MkVexel [(MkUnixel 1, areaBits)]
+      h0    = singletonCell (mkCell1 1) areaBits
       h1    = holographicHorizonEvaporationFuelModel (gohFuelForCapacity 54) x y 1 h0
-      bound = lookupUnixel (MkUnixel 1) h1
-      flux  = lookupUnixel (MkUnixel 2) h1
+      bound = lookupCellMultiset (mkCell1 1) h1
+      flux  = lookupCellMultiset (mkCell1 2) h1
   in boxEq bound ((intToBoxInt 2 * qRed) * areaBits) && boxEq flux (qBlue * areaBits)
 
