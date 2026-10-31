@@ -85,6 +85,25 @@ genesisVacuumBudget = epochCapacityBudget 1
 observerEpoch37Budget : CapacityBudget
 observerEpoch37Budget = epochCapacityBudget 37
 
+||| Formal compile-time witness: Dark Matter metric laws at Observer Epoch 37
+||| definitionally equal the 10th triangular residue T_10 = 55.
+public export
+0 prfDmLawsAtEpoch37MatchesTriangularResidue :
+  dmLawsAtEpoch 37 = Stage1.FourGeometries.triangularSum 10
+prfDmLawsAtEpoch37MatchesTriangularResidue = Refl
+
+||| Formal compile-time witness: Dark Matter metric laws at Observer Epoch 38
+||| definitionally equal T_10 plus the dual-mode Chromogeometric expansion pair (+2): 55 + 2 = 57.
+public export
+0 prfDmLawsAtEpoch38MatchesTriangularPlusTwo :
+  dmLawsAtEpoch 38 = Stage1.FourGeometries.triangularSum 10 + 2
+prfDmLawsAtEpoch38MatchesTriangularPlusTwo = Refl
+
+||| Observer Eddington Point Budget (Epoch 38: VM=27, DE=128, DM=57).
+%inline public export
+observerEpoch38Budget : CapacityBudget
+observerEpoch38Budget = epochCapacityBudget 38
+
 --------------------------------------------------------------------------------
 -- 4. 3LTT QTT LINEAR COSMIC HYPER-CYCLE BUDGET MAPPING
 --------------------------------------------------------------------------------
