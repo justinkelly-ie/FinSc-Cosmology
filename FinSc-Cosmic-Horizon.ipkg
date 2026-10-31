@@ -7,9 +7,6 @@ depends = FinSc-Geometry, FinSc-Multiset, FinSc-Metric-Substrate, FinSc-Phase-Un
 sourcedir = "src"
 
 modules = CosmicHorizon,
-          Cosmology,
-          Cosmology.Stage0,
-          Cosmology.Stage1,
           Stage0.Cosmology.CapacityBudget,
           Stage0.Cosmology.MetricLawLedger,
           Stage0.Cosmology.StreamingCosmology,
