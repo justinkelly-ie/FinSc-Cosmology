@@ -18,8 +18,9 @@ import Data.Fuel
 --------------------------------------------------------------------------------
 
 ||| Maps QuadStreamMultiset payload to CyclicCosmicEpoch state.
+||| Polymorphic across any item carrier type a (Rule 03 §8).
 public export
-quadStreamToCosmicEpoch : QuadStreamMultiset BoxInt -> CyclicCosmicEpoch
+quadStreamToCosmicEpoch : QuadStreamMultiset a -> CyclicCosmicEpoch
 quadStreamToCosmicEpoch (MkQuadStream e h p s) =
   let stepIdx = boxToNat (multisetSum e)
       matterMass = boxToNat (multisetSum p)
@@ -65,9 +66,44 @@ fusedCosmologyStreamFuelModel _ seedEpoch = MkStream nextStep (1, seedEpoch)
       in Yield ep (S curr, ep')
 
 ||| Deforested Quad-Stream pipeline for Cosmology law dynamics over Fuel.
+||| Uses authentic CosmicSectorToken carriers for sector degrees of freedom (Rule 03 §8).
 public export
-fusedQuadStreamCosmologyPipeline : Fuel -> QuadStreamMultiset BoxInt -> FusedStream (QuadStreamMultiset BoxInt)
-fusedQuadStreamCosmologyPipeline f seedQs =
+fusedQuadStreamCosmologyPipeline : Fuel -> QuadStreamMultiset CosmicSectorToken -> FusedStream (QuadStreamMultiset CosmicSectorToken)
+fusedQuadStreamCosmologyPipeline _ seedQs =
+  MkStream (\(curr, qs) =>
+    let ep = quadStreamToCosmicEpoch qs
+        ep' = collapseAndReboundEpoch ep
+        vm = natToBoxInt ep'.concreteState.particleCount
+        de = intToBoxInt 128
+        dm = multiplicity hyperbolicSignature2D ep'.darkEnergyLaws
+        qs' = MkQuadStream (AddM EllipticMatterToken vm ZeroM)
+                           (AddM HyperbolicDarkEnergyToken de ZeroM)
+                           ZeroM
+                           (AddM SubstrateDarkMatterToken dm ZeroM)
+    in Yield qs (S curr, qs')
+  ) (1, seedQs)
+
+||| Deforested Quad-Stream pipeline for Cosmology law dynamics over model-indexed GohFuel.
+public export
+fusedQuadStreamCosmologyPipelineFuelModel : GohFuel cap -> QuadStreamMultiset CosmicSectorToken -> FusedStream (QuadStreamMultiset CosmicSectorToken)
+fusedQuadStreamCosmologyPipelineFuelModel fuel seedQs =
+  MkStream (\(curr, qs) =>
+    let ep = quadStreamToCosmicEpoch qs
+        ep' = collapseAndReboundEpoch ep
+        vm = natToBoxInt ep'.concreteState.particleCount
+        de = intToBoxInt 128
+        dm = multiplicity hyperbolicSignature2D ep'.darkEnergyLaws
+        qs' = MkQuadStream (AddM EllipticMatterToken vm ZeroM)
+                           (AddM HyperbolicDarkEnergyToken de ZeroM)
+                           ZeroM
+                           (AddM SubstrateDarkMatterToken dm ZeroM)
+    in Yield qs (S curr, qs')
+  ) (1, seedQs)
+
+||| Backward-compatible Deforested Quad-Stream pipeline for integer coordinate payloads over Fuel.
+public export
+fusedQuadStreamCosmologyPipelineBoxInt : Fuel -> QuadStreamMultiset BoxInt -> FusedStream (QuadStreamMultiset BoxInt)
+fusedQuadStreamCosmologyPipelineBoxInt f seedQs =
   let cosmoStep = \qs =>
         let ep = quadStreamToCosmicEpoch qs
             ep' = collapseAndReboundEpoch ep
@@ -79,23 +115,6 @@ fusedQuadStreamCosmologyPipeline f seedQs =
                         ZeroM
                         (AddM (intToBoxInt 1) dm ZeroM)
   in fusedQuadStreamPipeline f cosmoStep seedQs
-
-||| Deforested Quad-Stream pipeline for Cosmology law dynamics over model-indexed GohFuel.
-public export
-fusedQuadStreamCosmologyPipelineFuelModel : GohFuel cap -> QuadStreamMultiset BoxInt -> FusedStream (QuadStreamMultiset BoxInt)
-fusedQuadStreamCosmologyPipelineFuelModel fuel seedQs =
-  MkStream (\(curr, qs) =>
-    let ep = quadStreamToCosmicEpoch qs
-        ep' = collapseAndReboundEpoch ep
-        vm = natToBoxInt ep'.concreteState.particleCount
-        de = intToBoxInt 128
-        dm = multiplicity hyperbolicSignature2D ep'.darkEnergyLaws
-        qs' = MkQuadStream (AddM (intToBoxInt 1) vm ZeroM)
-                           (AddM (intToBoxInt 1) de ZeroM)
-                           ZeroM
-                           (AddM (intToBoxInt 1) dm ZeroM)
-    in Yield qs (S curr, qs')
-  ) (1, seedQs)
 
 ||| Evaluates total accumulated dark energy law count across N cosmic steps over Fuel.
 public export

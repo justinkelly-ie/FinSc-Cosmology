@@ -13,6 +13,7 @@ import Stage1.Cosmology.MultisetAdjunction
 import Stage1.RationalTrig
 import Stage1.MaxelPolyBridge
 import Stage0.StructuralFuel
+import Stage0.Cosmology.CapacityBudget
 import Data.Fuel
 
 %default total
@@ -56,29 +57,31 @@ initMacroCosmicEnvelope : Vexel
 initMacroCosmicEnvelope =
   macroCosmicVexel (intToBoxInt 1) (natToBoxInt Stage1.FourGeometries.ellipticLatticeCapacity) (natToBoxInt Stage1.FourGeometries.darkMatterTriangularResidue) (natToBoxInt Stage1.FourGeometries.hyperbolicRomCapacity)
 
-||| QuadStream representation of cosmological fluid envelope:
+||| QuadStream representation of cosmological fluid envelope over authentic CosmicSectorTokens:
 |||   ellipticStream   : Baryonic Matter (27 states)
 |||   hyperbolicStream : Vacuum / Clustering Energy (128 states)
 |||   parabolicStream  : FLRW Spacetime Expansion Stream
 |||   substrateStream  : Dark Matter Substrate Law Ledger (55 states)
 public export
-macroCosmicQuadStream : BoxInt -> BoxInt -> BoxInt -> BoxInt -> QuadStreamMultiset BoxInt
+macroCosmicQuadStream : BoxInt -> BoxInt -> BoxInt -> BoxInt -> QuadStreamMultiset CosmicSectorToken
 macroCosmicQuadStream scale baryon dark cluster =
   MkQuadStream
-    (AddM (intToBoxInt 1) baryon ZeroM)
-    (AddM (intToBoxInt 1) cluster ZeroM)
-    (AddM (intToBoxInt 1) scale ZeroM)
-    (AddM (intToBoxInt 1) dark ZeroM)
+    (AddM EllipticMatterToken baryon ZeroM)
+    (AddM HyperbolicDarkEnergyToken cluster ZeroM)
+    (AddM ParabolicExpansionToken scale ZeroM)
+    (AddM SubstrateDarkMatterToken dark ZeroM)
 
 public export
-initMacroCosmicQuadStream : QuadStreamMultiset BoxInt
+initMacroCosmicQuadStream : QuadStreamMultiset CosmicSectorToken
 initMacroCosmicQuadStream =
   macroCosmicQuadStream (intToBoxInt 1) (natToBoxInt Stage1.FourGeometries.ellipticLatticeCapacity) (natToBoxInt Stage1.FourGeometries.darkMatterTriangularResidue) (natToBoxInt Stage1.FourGeometries.hyperbolicRomCapacity)
 
 ||| Computes total cosmic mass aggregated across QuadStream sectors (27 + 55 + 128 = 210).
+||| Works polymorphically across any QuadStreamMultiset payload (Rule 03 §8).
 public export
-computeTotalCosmicMassQuadStream : QuadStreamMultiset BoxInt -> BoxInt
-computeTotalCosmicMassQuadStream qs = quadStreamTotalMass qs - multisetSum qs.parabolicStream
+computeTotalCosmicMassQuadStream : QuadStreamMultiset a -> BoxInt
+computeTotalCosmicMassQuadStream (MkQuadStream e h p s) =
+  multisetSum e + multisetSum h + multisetSum s
 
 ||| Compiler proof witness verifying QuadStream cosmic budget closure (27 + 55 + 128 = 210).
 public export

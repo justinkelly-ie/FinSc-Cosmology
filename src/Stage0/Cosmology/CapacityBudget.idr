@@ -7,8 +7,61 @@ import public Stage2.ThreeLevel
 import public Stage0.Cosmology.MetricLawLedger
 import public Stage0.UniverseState
 import public Stage1.FourGeometries
+import public Stage1.QuadStream
 
 %default total
+
+--------------------------------------------------------------------------------
+-- 0. COSMIC SECTOR TOKENS & DEGREE OF FREEDOM CLASSIFICATION (Rule 03 §8)
+--------------------------------------------------------------------------------
+
+||| Authentic discrete token identifying a cosmological sector degree of freedom.
+||| Eliminates ungrounded dummy integer tokens in multiset quad-streams.
+public export
+data CosmicSectorToken
+  = EllipticMatterToken       -- Visible matter degree of freedom (elliptic sector, 27 states)
+  | HyperbolicDarkEnergyToken -- Dark energy vacuum degree of freedom (hyperbolic sector, 128 states)
+  | ParabolicExpansionToken   -- Cosmic scale factor degree of freedom (parabolic sector)
+  | SubstrateDarkMatterToken  -- Dark matter metric law residue (substrate sector, 55 states)
+
+public export
+Eq CosmicSectorToken where
+  EllipticMatterToken == EllipticMatterToken = True
+  HyperbolicDarkEnergyToken == HyperbolicDarkEnergyToken = True
+  ParabolicExpansionToken == ParabolicExpansionToken = True
+  SubstrateDarkMatterToken == SubstrateDarkMatterToken = True
+  _ == _ = False
+
+public export
+Show CosmicSectorToken where
+  show EllipticMatterToken = "EllipticMatterToken (VM=27)"
+  show HyperbolicDarkEnergyToken = "HyperbolicDarkEnergyToken (DE=128)"
+  show ParabolicExpansionToken = "ParabolicExpansionToken"
+  show SubstrateDarkMatterToken = "SubstrateDarkMatterToken (DM=55)"
+
+||| Canonical bidirectional projection between CosmicSectorToken and QuadStreamChannel.
+public export
+sectorTokenToChannel : CosmicSectorToken -> QuadStreamChannel
+sectorTokenToChannel EllipticMatterToken       = EllipticSector
+sectorTokenToChannel HyperbolicDarkEnergyToken = HyperbolicSector
+sectorTokenToChannel ParabolicExpansionToken   = ParabolicSector
+sectorTokenToChannel SubstrateDarkMatterToken  = SubstrateSector
+
+public export
+channelToSectorToken : QuadStreamChannel -> CosmicSectorToken
+channelToSectorToken EllipticSector   = EllipticMatterToken
+channelToSectorToken HyperbolicSector = HyperbolicDarkEnergyToken
+channelToSectorToken ParabolicSector  = ParabolicExpansionToken
+channelToSectorToken SubstrateSector  = SubstrateDarkMatterToken
+
+||| Formal compile-time proof of isomorphism between tokens and channels.
+public export
+0 prfSectorTokenChannelIsomorphism : (t : CosmicSectorToken) ->
+  channelToSectorToken (sectorTokenToChannel t) = t
+prfSectorTokenChannelIsomorphism EllipticMatterToken       = Refl
+prfSectorTokenChannelIsomorphism HyperbolicDarkEnergyToken = Refl
+prfSectorTokenChannelIsomorphism ParabolicExpansionToken   = Refl
+prfSectorTokenChannelIsomorphism SubstrateDarkMatterToken  = Refl
 
 --------------------------------------------------------------------------------
 -- 1. DYNAMIC COSMOLOGICAL CAPACITY BUDGET BY EPOCH
@@ -80,7 +133,9 @@ epochCapacityBudget ep =
 genesisVacuumBudget : CapacityBudget
 genesisVacuumBudget = epochCapacityBudget 1
 
-||| Observer Post-Baryogenesis Saturation Budget (Epoch 37: VM=27, DE=128, DM=55 -> Total=210).
+||| Primorial 210 Ground State Saturation Budget (Scale step index k=37, 1-based step n=38).
+||| Visible Matter = 27 (elliptic VM), Dark Energy = 128 (hyperbolic DE), Dark Matter = 55 (parabolic T_10).
+||| Total capacity = 27 + 128 + 55 = 210, achieving the unique discrete Free Energy minimum F = -1320 (Rule 03 §2).
 %inline public export
 observerEpoch37Budget : CapacityBudget
 observerEpoch37Budget = epochCapacityBudget 37
@@ -99,7 +154,9 @@ public export
   dmLawsAtEpoch 38 = Stage1.FourGeometries.triangularSum 10 + 2
 prfDmLawsAtEpoch38MatchesTriangularPlusTwo = Refl
 
-||| Observer Eddington Point Budget (Epoch 38: VM=27, DE=128, DM=57).
+||| Gate-Pure Observer Epoch Budget (Scale step index k=38, 1-based step n=39 = 3 * 13).
+||| Situated at the 13-smooth GatePure point where biological systems and active inference
+||| emerge lawfully as non-equilibrium dissipative steady states (Rule 03 §5).
 %inline public export
 observerEpoch38Budget : CapacityBudget
 observerEpoch38Budget = epochCapacityBudget 38
