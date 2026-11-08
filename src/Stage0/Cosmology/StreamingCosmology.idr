@@ -78,8 +78,8 @@ fusedQuadStreamCosmologyPipeline _ seedQs =
         dm = multiplicity hyperbolicSignature2D ep'.darkEnergyLaws
         qs' = MkQuadStream (AddM EllipticMatterToken vm ZeroM)
                            (AddM HyperbolicDarkEnergyToken de ZeroM)
-                           ZeroM
-                           (AddM SubstrateDarkMatterToken dm ZeroM)
+                           (AddM ParabolicExpansionToken dm ZeroM)
+                           (AddM SubstrateDarkMatterToken (intToBoxInt 0) ZeroM)
     in Yield qs (S curr, qs')
   ) (1, seedQs)
 
@@ -95,8 +95,8 @@ fusedQuadStreamCosmologyPipelineFuelModel fuel seedQs =
         dm = multiplicity hyperbolicSignature2D ep'.darkEnergyLaws
         qs' = MkQuadStream (AddM EllipticMatterToken vm ZeroM)
                            (AddM HyperbolicDarkEnergyToken de ZeroM)
-                           ZeroM
-                           (AddM SubstrateDarkMatterToken dm ZeroM)
+                           (AddM ParabolicExpansionToken dm ZeroM)
+                           (AddM SubstrateDarkMatterToken (intToBoxInt 0) ZeroM)
     in Yield qs (S curr, qs')
   ) (1, seedQs)
 
@@ -110,10 +110,10 @@ fusedQuadStreamCosmologyPipelineBoxInt f seedQs =
             vm = natToBoxInt ep'.concreteState.particleCount
             de = intToBoxInt 128
             dm = multiplicity hyperbolicSignature2D ep'.darkEnergyLaws
-        in MkQuadStream (AddM (intToBoxInt 1) vm ZeroM)
+        in MkQuadStream (AddM (intToBoxInt 0) vm ZeroM)
                         (AddM (intToBoxInt 1) de ZeroM)
-                        ZeroM
-                        (AddM (intToBoxInt 1) dm ZeroM)
+                        (AddM (intToBoxInt 2) dm ZeroM)
+                        (AddM (intToBoxInt 3) (intToBoxInt 0) ZeroM)
   in fusedQuadStreamPipeline f cosmoStep seedQs
 
 ||| Evaluates total accumulated dark energy law count across N cosmic steps over Fuel.
