@@ -1,7 +1,7 @@
 package FinSc-Cosmic-Horizon
 version = 0.3.4
 authors = "Justin Kelly"
-brief   = "Layer 8b Cosmic Horizon Scaling, Holographic Area Law (6L^2 = 54) & Capacity Budgeting."
+brief   = "Layer 14 Cosmic Horizon Scaling, Holographic Area Law (6L^2 = 54) & Fractional Anyons"
 
 depends = FinSc-Geometry, FinSc-Multiset, FinSc-Metric-Substrate, FinSc-Phase-Unfolding, FinSc-Thermodynamics, base, linear
 sourcedir = "src"
