@@ -22,9 +22,9 @@ import Data.Fuel
 public export
 quadStreamToCosmicEpoch : QuadStreamMultiset a -> CyclicCosmicEpoch
 quadStreamToCosmicEpoch (MkQuadStream e h p s) =
-  let stepIdx = boxToNat (multisetSum e)
-      matterMass = boxToNat (multisetSum p)
-      darkLaws = AddM hyperbolicSignature2D (multisetSum h) ZeroM
+  let stepIdx = boxToNat (totalMassBox e)
+      matterMass = boxToNat (totalMassBox p)
+      darkLaws = singletonCarrier hyperbolicSignature2D (totalMassBox h)
   in MkCyclicEpoch stepIdx (MkConcrete matterMass) darkLaws
 
 ||| Constructive OnSeq mapping term index n to CyclicCosmicEpoch trajectory.
@@ -75,11 +75,11 @@ fusedQuadStreamCosmologyPipeline _ seedQs =
         ep' = collapseAndReboundEpoch ep
         vm = natToBoxInt ep'.concreteState.particleCount
         de = intToBoxInt 128
-        dm = multiplicity hyperbolicSignature2D ep'.darkEnergyLaws
-        qs' = MkQuadStream (AddM EllipticMatterToken vm ZeroM)
-                           (AddM HyperbolicDarkEnergyToken de ZeroM)
-                           (AddM ParabolicExpansionToken dm ZeroM)
-                           (AddM SubstrateDarkMatterToken (intToBoxInt 0) ZeroM)
+        dm = lookupCarrier hyperbolicSignature2D ep'.darkEnergyLaws
+        qs' = MkQuadStream (singletonCarrier EllipticMatterToken vm)
+                           (singletonCarrier HyperbolicDarkEnergyToken de)
+                           (singletonCarrier ParabolicExpansionToken dm)
+                           (singletonCarrier SubstrateDarkMatterToken (intToBoxInt 0))
     in Yield qs (S curr, qs')
   ) (1, seedQs)
 
@@ -92,11 +92,11 @@ fusedQuadStreamCosmologyPipelineFuelModel fuel seedQs =
         ep' = collapseAndReboundEpoch ep
         vm = natToBoxInt ep'.concreteState.particleCount
         de = intToBoxInt 128
-        dm = multiplicity hyperbolicSignature2D ep'.darkEnergyLaws
-        qs' = MkQuadStream (AddM EllipticMatterToken vm ZeroM)
-                           (AddM HyperbolicDarkEnergyToken de ZeroM)
-                           (AddM ParabolicExpansionToken dm ZeroM)
-                           (AddM SubstrateDarkMatterToken (intToBoxInt 0) ZeroM)
+        dm = lookupCarrier hyperbolicSignature2D ep'.darkEnergyLaws
+        qs' = MkQuadStream (singletonCarrier EllipticMatterToken vm)
+                           (singletonCarrier HyperbolicDarkEnergyToken de)
+                           (singletonCarrier ParabolicExpansionToken dm)
+                           (singletonCarrier SubstrateDarkMatterToken (intToBoxInt 0))
     in Yield qs (S curr, qs')
   ) (1, seedQs)
 
@@ -109,11 +109,11 @@ fusedQuadStreamCosmologyPipelineBoxInt f seedQs =
             ep' = collapseAndReboundEpoch ep
             vm = natToBoxInt ep'.concreteState.particleCount
             de = intToBoxInt 128
-            dm = multiplicity hyperbolicSignature2D ep'.darkEnergyLaws
-        in MkQuadStream (AddM (intToBoxInt 0) vm ZeroM)
-                        (AddM (intToBoxInt 1) de ZeroM)
-                        (AddM (intToBoxInt 2) dm ZeroM)
-                        (AddM (intToBoxInt 3) (intToBoxInt 0) ZeroM)
+            dm = lookupCarrier hyperbolicSignature2D ep'.darkEnergyLaws
+        in MkQuadStream (singletonCarrier (intToBoxInt 0) vm)
+                        (singletonCarrier (intToBoxInt 1) de)
+                        (singletonCarrier (intToBoxInt 2) dm)
+                        (singletonCarrier (intToBoxInt 3) (intToBoxInt 0))
   in fusedQuadStreamPipeline f cosmoStep seedQs
 
 ||| Evaluates total accumulated dark energy law count across N cosmic steps over Fuel.
@@ -127,7 +127,7 @@ fusedComputeCosmicLawAccumulation (More f) seedEpoch =
     loop Dry _ acc = acc
     loop (More k) (curr, ep) acc =
       let ep' = collapseAndReboundEpoch ep
-      in loop k (S curr, ep') (multiplicity hyperbolicSignature2D ep.darkEnergyLaws + acc)
+      in loop k (S curr, ep') (lookupCarrier hyperbolicSignature2D ep.darkEnergyLaws + acc)
 
 ||| Total Nat fuel-bounded accumulated dark energy law count across N cosmic steps.
 public export
@@ -140,7 +140,7 @@ fusedComputeCosmicLawAccumulationNat (S f) seedEpoch =
     loop Z _ acc = acc
     loop (S k) (curr, ep) acc =
       let ep' = collapseAndReboundEpoch ep
-      in loop k (S curr, ep') (multiplicity hyperbolicSignature2D ep.darkEnergyLaws + acc)
+      in loop k (S curr, ep') (lookupCarrier hyperbolicSignature2D ep.darkEnergyLaws + acc)
 
 ||| Evaluates total accumulated dark energy law count across cosmic steps using model-indexed GohFuel.
 public export
@@ -157,7 +157,7 @@ fusedComputeCosmicLawAccumulationFuelModel fuel seedEpoch =
 public export
 auditStreamingCosmologyProof : Bool
 auditStreamingCosmologyProof =
-  let initEp = MkCyclicEpoch 1 (MkConcrete 27) ZeroM
+  let initEp = MkCyclicEpoch 1 (MkConcrete 27) BoxLeaf
       clip = getCosmologyClip initEp 0 3
       lawsCount = fusedComputeCosmicLawAccumulationNat 5 initEp
   in length (elements clip) == 3 && lawsCount >= intToBoxInt 0

@@ -77,7 +77,7 @@ implementation PreorderedMonoid AbstractDomain where
 
 ||| MultisetScaleAdjunction instance (f_* ⊣ f^*) between ConcreteDomain and AbstractDomain.
 public export
-MultisetScaleAdjunction ConcreteDomain AbstractDomain where
+MultisetScaleDuality ConcreteDomain AbstractDomain where
   f_pushforward (MkConcrete c) = MkAbstract c
   f_pullback (MkAbstract a)    = MkConcrete a
   verifyUnit _   = Refl
@@ -145,10 +145,10 @@ proofHomInv (AddM (x, MkAbstractScaleFunctor (MkAbstract c) y) w rest) =
   let rec = proofHomInv rest
   in cong (AddM (x, MkAbstractScaleFunctor (MkAbstract c) y) w) rec
 
-||| MultisetAdjunction instance L_Cosmic ⊣ R_Cosmic
-||| between concrete and abstract cosmological scale space preserving exact BoxInt hom-tensor proof witnesses.
+||| MultisetDuality instance linking `ConcreteScaleFunctor` and `AbstractScaleFunctor`
+||| between concrete and abstract cosmological scale space preserving exact BoxInt pair-tensor proof witnesses.
 public export
-MultisetAdjunction ConcreteScaleFunctor AbstractScaleFunctor where
+MultisetDuality ConcreteScaleFunctor AbstractScaleFunctor where
   leftAdjoint x = MkConcreteScaleFunctor (MkConcrete 0) x
   rightAdjoint (MkConcreteScaleFunctor _ x) = x
   homTensorIso = scaleHomTensorIso
@@ -156,10 +156,10 @@ MultisetAdjunction ConcreteScaleFunctor AbstractScaleFunctor where
   verifyHomIso = proofHomIso
   verifyHomInv = proofHomInv
 
-||| 2LTT Subfibration Reflection Functor instance coupling cosmic multiset adjunction with QTT 0 erased reflection
+||| 2LTT Subfibration Reflection Duality instance coupling cosmic multiset duality with QTT 0 erased reflection
 public export
-StrictReflectionFunctor ConcreteScaleFunctor AbstractScaleFunctor where
-  reflectionAdjunction = %search
+StrictReflectionDuality ConcreteScaleFunctor AbstractScaleFunctor where
+  reflectionDuality = %search
   reflectionRefl _ = Refl
 
 ||| QTT 0 Erased Proof: Cosmology Multiset Adjunction Duality Invariant
@@ -206,6 +206,16 @@ Eq EpochToken where
   DecoherentCycle == DecoherentCycle = True
   _               == _               = False
 
+public export
+Ord EpochToken where
+  compare GatePureCycle   GatePureCycle   = EQ
+  compare GatePureCycle   DecoherentCycle = LT
+  compare DecoherentCycle GatePureCycle   = GT
+  compare DecoherentCycle DecoherentCycle = EQ
+
+public export
+DiscreteCoord EpochToken where
+
 ||| Gate-pure 13-smooth scale cycle count (76).
 public export
 gatePureScaleCount : Nat
@@ -221,19 +231,19 @@ public export
 totalCosmicScaleHierarchy : Nat
 totalCosmicScaleHierarchy = gatePureScaleCount + decoherentScaleCount
 
-||| Evaluates the 38-cycle Eddington cosmological trajectory over a Multiset BoxInt EpochToken.
+||| Evaluates the 38-cycle Eddington cosmological trajectory over a Carrier EpochToken.
 ||| Observer epoch k=38 is gate-pure (76 pure cycles, 61 decoherent cycles, 137 total).
 public export
-eddingtonCosmicTrajectory : Multiset BoxInt EpochToken
+eddingtonCosmicTrajectory : Carrier EpochToken
 eddingtonCosmicTrajectory =
-  AddM GatePureCycle (intToBoxInt (cast gatePureScaleCount)) (AddM DecoherentCycle (intToBoxInt (cast decoherentScaleCount)) ZeroM)
+  singletonCarrier GatePureCycle (intToBoxInt (cast gatePureScaleCount)) <+> singletonCarrier DecoherentCycle (intToBoxInt (cast decoherentScaleCount))
 
 ||| Audits Eddington cosmic budget closure (76 + 61 = 137 total cycles, 76 pure).
 public export
 auditEddingtonCosmicMultisetProof : Bool
 auditEddingtonCosmicMultisetProof =
-  let pureCount = multiplicity GatePureCycle eddingtonCosmicTrajectory
-      decoCount = multiplicity DecoherentCycle eddingtonCosmicTrajectory
+  let pureCount = lookupCarrier GatePureCycle eddingtonCosmicTrajectory
+      decoCount = lookupCarrier DecoherentCycle eddingtonCosmicTrajectory
   in pureCount == natToBoxInt gatePureScaleCount &&
      decoCount == natToBoxInt decoherentScaleCount &&
      (pureCount + decoCount) == natToBoxInt totalCosmicScaleHierarchy
@@ -262,9 +272,9 @@ public export
 Eq ManifestSpaceDomain where
   (MkManifestDomain m1) == (MkManifestDomain m2) = m1 == m2
 
-||| MultisetScaleAdjunction instance between SpectralSpaceDomain and ManifestSpaceDomain
+||| MultisetScaleDuality instance between SpectralSpaceDomain and ManifestSpaceDomain
 public export
-MultisetScaleAdjunction SpectralSpaceDomain ManifestSpaceDomain where
+MultisetScaleDuality SpectralSpaceDomain ManifestSpaceDomain where
   f_pushforward (MkSpectralDomain s) = MkManifestDomain s
   f_pullback (MkManifestDomain m)    = MkSpectralDomain m
   verifyUnit _   = Refl
@@ -328,9 +338,9 @@ proofSpectralManifestHomInv (AddM (val, MkManifestFunctor (MkManifestDomain m) p
   let rec = proofSpectralManifestHomInv rest
   in cong (AddM (val, MkManifestFunctor (MkManifestDomain m) payload) weight) rec
 
-||| Category-Theoretic MultisetAdjunction instance L_Spectral ⊣ R_Manifest
+||| MultisetDuality instance linking Spectral and Manifest representations
 public export
-MultisetAdjunction SpectralFunctor ManifestFunctor where
+MultisetDuality SpectralFunctor ManifestFunctor where
   leftAdjoint x = MkSpectralFunctor (MkSpectralDomain (intToBoxInt 0)) x
   rightAdjoint (MkSpectralFunctor _ x) = x
   homTensorIso = spectralManifestHomTensorIso
@@ -339,8 +349,8 @@ MultisetAdjunction SpectralFunctor ManifestFunctor where
   verifyHomInv = proofSpectralManifestHomInv
 
 public export
-StrictReflectionFunctor SpectralFunctor ManifestFunctor where
-  reflectionAdjunction = %search
+StrictReflectionDuality SpectralFunctor ManifestFunctor where
+  reflectionDuality = %search
   reflectionRefl _ = Refl
 
 --------------------------------------------------------------------------------
@@ -365,7 +375,7 @@ collapseAndReboundEpoch : CyclicCosmicEpoch -> CyclicCosmicEpoch
 collapseAndReboundEpoch (MkCyclicEpoch ep (MkConcrete particleCount) darkEnergy) =
   let abstractState = f_pushforward {a=AbstractDomain} (MkConcrete particleCount)
       reboundState  = f_pullback {a=AbstractDomain} abstractState
-      updatedDark   = AddM ellipticSignature2D (intToBoxInt 1) (AddM hyperbolicSignature2D (intToBoxInt 1) darkEnergy)
+      updatedDark   = singletonCarrier ellipticSignature2D (intToBoxInt 1) <+> singletonCarrier hyperbolicSignature2D (intToBoxInt 1) <+> darkEnergy
   in MkCyclicEpoch (S ep) reboundState updatedDark
 
 ||| Static proof witness verifying physical law residue persistence across cyclic universe collapse.
@@ -379,11 +389,11 @@ verifyCyclicLawPreservation (MkCyclicEpoch ep (MkConcrete c) dark) = Refl
 --------------------------------------------------------------------------------
 
 ||| 2LTT Staged 38-Cycle Eddington Trajectory Transducer.
-%inline public export
+public export
 stagedEddingtonPipeline : QuadStreamMultiset BoxInt -> Code AbstractDomain
-stagedEddingtonPipeline qs = quote (MkAbstract (Stage0.BoxInt.boxToNat (multisetSum (qs.ellipticStream))))
+stagedEddingtonPipeline qs = quote (MkAbstract (Stage0.BoxInt.boxToNat (totalMassBox (qs.ellipticStream))))
 
 ||| QTT 0 Erased Proof Witness: Staged Eddington Trajectory Closure Invariant
 public export
-0 prfStagedEddingtonPipeline : (qs : QuadStreamMultiset BoxInt) -> splice (stagedEddingtonPipeline qs) = MkAbstract (Stage0.BoxInt.boxToNat (multisetSum (qs.ellipticStream)))
-prfStagedEddingtonPipeline qs = inverseSpliceQuote (MkAbstract (Stage0.BoxInt.boxToNat (multisetSum (qs.ellipticStream))))
+0 prfStagedEddingtonPipeline : (qs : QuadStreamMultiset BoxInt) -> splice (stagedEddingtonPipeline qs) = MkAbstract (Stage0.BoxInt.boxToNat (totalMassBox (qs.ellipticStream)))
+prfStagedEddingtonPipeline qs = inverseSpliceQuote (MkAbstract (Stage0.BoxInt.boxToNat (totalMassBox (qs.ellipticStream))))

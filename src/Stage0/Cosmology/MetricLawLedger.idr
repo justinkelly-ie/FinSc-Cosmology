@@ -28,6 +28,22 @@ Eq ChromogeometryLaw where
   _                == _                = False
 
 public export
+Ord ChromogeometryLaw where
+  compare x y = compare (tag x) (tag y)
+    where
+      tag : ChromogeometryLaw -> Nat
+      tag EllipticRed      = 0
+      tag HyperbolicGreen  = 1
+      tag ParabolicBlue    = 2
+      tag SubstrateTorsion = 3
+
+public export
+DiscreteCoord ChromogeometryLaw where
+
+public export
+DiscreteCoord MetricSignature where
+
+public export
 Show ChromogeometryLaw where
   show EllipticRed      = "Elliptic(Red)"
   show HyperbolicGreen  = "Hyperbolic(Green)"
@@ -38,30 +54,29 @@ Show ChromogeometryLaw where
 -- 2. CHROMOGEOMETRY DARK ENERGY MULTISET LAW LEDGER
 --------------------------------------------------------------------------------
 
-||| Dark Energy Law Multiset Ledger tracking law counts over BoxInt multiplicities.
+||| Dark Energy Law Carrier Ledger tracking law counts over BoxInt multiplicities.
 public export
 ChromogeometryLawLedger : Type
-ChromogeometryLawLedger = Multiset BoxInt ChromogeometryLaw
+ChromogeometryLawLedger = Carrier ChromogeometryLaw
 
-||| Empty Multiset Bootstrap State (Genesis Vacuum State for Epoch 1)
+||| Empty Carrier Bootstrap State (Genesis Vacuum State for Epoch 1)
 public export
 emptyLawLedger : ChromogeometryLawLedger
-emptyLawLedger = ZeroM
+emptyLawLedger = BoxLeaf
 
-||| Computes total dark energy law count across all metric signatures in the multiset.
+||| Computes total dark energy law count across all metric signatures in the carrier.
 public export
 countTotalDarkLaws : ChromogeometryLawLedger -> Nat
-countTotalDarkLaws ZeroM = 0
-countTotalDarkLaws (AddM _ v rest) = boxToNat v + countTotalDarkLaws rest
+countTotalDarkLaws = foldBoxTreeL (\acc, (_, v) => boxToNat v + acc) 0
 
 --------------------------------------------------------------------------------
--- 3. CANONICAL MULTISET METRIC SIGNATURE LEDGER & QUADRANCE EVALUATION
+-- 3. CANONICAL CARRIER METRIC SIGNATURE LEDGER & QUADRANCE EVALUATION
 --------------------------------------------------------------------------------
 
-||| Canonical pure multiset metric signature ledger tracking actual discrete metric tensors.
+||| Canonical carrier metric signature ledger tracking discrete metric signatures.
 public export
 CosmicMetricLedger : Type
-CosmicMetricLedger = Multiset BoxInt MetricSignature
+CosmicMetricLedger = Carrier MetricSignature
 
 ||| Isomorphism mapping ChromogeometryLaw tokens to canonical MetricSignature records.
 public export
@@ -71,23 +86,18 @@ chromogeometryLawToSignature HyperbolicGreen  = hyperbolicSignature2D
 chromogeometryLawToSignature ParabolicBlue    = parabolicSignature2D
 chromogeometryLawToSignature SubstrateTorsion = substrateSignature2D
 
-||| Converts a legacy ChromogeometryLawLedger into a canonical CosmicMetricLedger.
+||| Converts a ChromogeometryLawLedger into a canonical CosmicMetricLedger.
 public export
 lawLedgerToMetricLedger : ChromogeometryLawLedger -> CosmicMetricLedger
-lawLedgerToMetricLedger ZeroM = ZeroM
-lawLedgerToMetricLedger (AddM law w rest) =
-  AddM (chromogeometryLawToSignature law) w (lawLedgerToMetricLedger rest)
+lawLedgerToMetricLedger = pushforwardCarrier chromogeometryLawToSignature
 
 ||| Computes total law count across a CosmicMetricLedger.
 public export
 countMetricLedgerLaws : CosmicMetricLedger -> Nat
-countMetricLedgerLaws ZeroM = 0
-countMetricLedgerLaws (AddM _ v rest) = boxToNat v + countMetricLedgerLaws rest
+countMetricLedgerLaws = foldBoxTreeL (\acc, (_, v) => boxToNat v + acc) 0
 
-||| Evaluates discrete aggregate quadrance across the entire multiset metric ledger for coordinates x and y.
+||| Evaluates discrete aggregate quadrance across the entire carrier metric ledger for coordinates x and y.
 public export
 evaluateMetricLedgerQuadrance : CosmicMetricLedger -> BoxInt -> BoxInt -> BoxInt
-evaluateMetricLedgerQuadrance ZeroM _ _ = intToBoxInt 0
-evaluateMetricLedgerQuadrance (AddM sig w rest) x y =
-  let q = signatureQuadrance2D sig x y
-  in (q * w) + evaluateMetricLedgerQuadrance rest x y
+evaluateMetricLedgerQuadrance ledger x y =
+  foldBoxTreeL (\acc, (sig, w) => (signatureQuadrance2D sig x y * w) + acc) (intToBoxInt 0) ledger

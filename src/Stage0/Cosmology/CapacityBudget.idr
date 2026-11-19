@@ -33,6 +33,19 @@ Eq CosmicSectorToken where
   _ == _ = False
 
 public export
+Ord CosmicSectorToken where
+  compare x y = compare (tag x) (tag y)
+    where
+      tag : CosmicSectorToken -> Nat
+      tag EllipticMatterToken       = 0
+      tag HyperbolicDarkEnergyToken = 1
+      tag ParabolicExpansionToken   = 2
+      tag SubstrateDarkMatterToken  = 3
+
+public export
+DiscreteCoord CosmicSectorToken where
+
+public export
 Show CosmicSectorToken where
   show EllipticMatterToken = "EllipticMatterToken (VM=27)"
   show HyperbolicDarkEnergyToken = "HyperbolicDarkEnergyToken (DE=128)"
@@ -84,17 +97,17 @@ Show CapacityBudget where
     " | Total=" ++ show (vm + de + dm) ++ "]"
 
 ||| Evaluates total capacity bound of a budget.
-%inline public export
+public export
 totalCapacity : CapacityBudget -> Nat
 totalCapacity (MkCapacityBudget vm de dm) = vm + de + dm
 
 ||| Projects a canonical UniverseState into a CapacityBudget view.
-%inline public export
+public export
 universeToCapacityBudget : {vm, de, dm : Nat} -> UniverseState vm de dm -> CapacityBudget
 universeToCapacityBudget _ = MkCapacityBudget vm de dm
 
 ||| Canonical Observer Epoch 37 Capacity Budget projection from UniverseState 27 128 55.
-%inline public export
+public export
 observerUniverseCapacityBudget : CapacityBudget
 observerUniverseCapacityBudget = universeToCapacityBudget (seedCosmicVacuum 27 128 55)
 
@@ -103,13 +116,13 @@ observerUniverseCapacityBudget = universeToCapacityBudget (seedCosmicVacuum 27 1
 --------------------------------------------------------------------------------
 
 ||| Evaluates visible matter maxel count for epoch ep (0 pre-baryogenesis, 27 post-baryogenesis).
-%inline public export
+public export
 vmMaxelsAtEpoch : Nat -> Nat
 vmMaxelsAtEpoch ep =
   if ep <= 1 then 0 else ellipticLatticeCapacity
 
 ||| Evaluates dark matter metric law count for epoch ep (0 at Genesis -> 55 at Epoch 37).
-%inline public export
+public export
 dmLawsAtEpoch : Nat -> Nat
 dmLawsAtEpoch 0 = 0
 dmLawsAtEpoch 1 = 0
@@ -120,7 +133,7 @@ dmLawsAtEpoch ep =
     17 + (minus ep 18 * 2)
 
 ||| Dynamically evaluates the exact capacity budget for epoch ep.
-%inline public export
+public export
 epochCapacityBudget : (ep : Nat) -> CapacityBudget
 epochCapacityBudget ep =
   let vm = vmMaxelsAtEpoch ep
@@ -129,14 +142,14 @@ epochCapacityBudget ep =
   in MkCapacityBudget vm de dm
 
 ||| Genesis Pre-Baryogenesis Vacuum Budget (Epoch 1: VM=0, DE=128, DM=0 -> Total=128).
-%inline public export
+public export
 genesisVacuumBudget : CapacityBudget
 genesisVacuumBudget = epochCapacityBudget 1
 
 ||| Primorial 210 Ground State Saturation Budget (Scale step index k=37, 1-based step n=38).
 ||| Visible Matter = 27 (elliptic VM), Dark Energy = 128 (hyperbolic DE), Dark Matter = 55 (parabolic T_10).
 ||| Total capacity = 27 + 128 + 55 = 210, achieving the unique discrete Free Energy minimum F = -1320 (Rule 03 §2).
-%inline public export
+public export
 observerEpoch37Budget : CapacityBudget
 observerEpoch37Budget = epochCapacityBudget 37
 
@@ -157,7 +170,7 @@ prfDmLawsAtEpoch38MatchesTriangularPlusTwo = Refl
 ||| Gate-Pure Observer Epoch Budget (Scale step index k=38, 1-based step n=39 = 3 * 13).
 ||| Situated at the 13-smooth GatePure point where biological systems and active inference
 ||| emerge lawfully as non-equilibrium dissipative steady states (Rule 03 §5).
-%inline public export
+public export
 observerEpoch38Budget : CapacityBudget
 observerEpoch38Budget = epochCapacityBudget 38
 
@@ -166,7 +179,7 @@ observerEpoch38Budget = epochCapacityBudget 38
 --------------------------------------------------------------------------------
 
 ||| Evaluates the capacity budget for a 3LTT ParameterizedCycleState u e state.
-%inline public export
+public export
 capacityBudgetForCycleState : ParameterizedCycleState u e a -> CapacityBudget
 capacityBudgetForCycleState (MkCycleState u e _) = epochCapacityBudget e
 
@@ -197,7 +210,7 @@ record BoundedCycleState (u : Nat) (e : Nat) (a : Type) where
   0 horizonPrf : HorizonBoundWitness e
 
 ||| Evaluates capacity budget for a bounded cycle state with compile-time scale horizon bound.
-%inline public export
+public export
 capacityBudgetForBoundedCycleState : BoundedCycleState u e a -> CapacityBudget
 capacityBudgetForBoundedCycleState (MkBoundedCycleState st _) = capacityBudgetForCycleState st
 

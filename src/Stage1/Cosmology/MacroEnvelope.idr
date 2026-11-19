@@ -22,6 +22,32 @@ import Data.Fuel
 -- 1. MACRO-SCALE FLUID ENVELOPE & COSMOLOGICAL CLUSTERING ON MULTISET BASIS
 --------------------------------------------------------------------------------
 
+public export
+envCell0 : Unixel
+envCell0 = mkCell1 0
+
+public export
+envCell1 : Unixel
+envCell1 = mkCell1 1
+
+public export
+envCell2 : Unixel
+envCell2 = mkCell1 2
+
+public export
+envCell3 : Unixel
+envCell3 = mkCell1 3
+
+macroCosmicTail23 : Vexel
+macroCosmicTail23 =
+  BoxNode 2 BoxLeaf envCell2 (intToBoxInt 55)
+    (BoxNode 1 BoxLeaf envCell3 (intToBoxInt 128) BoxLeaf)
+
+macroCosmicZeroScale : Vexel
+macroCosmicZeroScale =
+  BoxNode 2 (BoxNode 1 BoxLeaf envCell1 (intToBoxInt 27) BoxLeaf) envCell2 (intToBoxInt 55)
+    (BoxNode 1 BoxLeaf envCell3 (intToBoxInt 128) BoxLeaf)
+
 ||| Multiset basis vector encoding macro-scale cosmological fluid envelope at scale k:
 |||   index 0: scaleFactor
 |||   index 1: baryonMass
@@ -29,11 +55,16 @@ import Data.Fuel
 |||   index 3: clusteringH2O
 public export
 macroCosmicVexel : BoxInt -> BoxInt -> BoxInt -> BoxInt -> Vexel
-macroCosmicVexel s b d c =
-  singletonCell (mkCell1 0) s <+>
-  singletonCell (mkCell1 1) b <+>
-  singletonCell (mkCell1 2) d <+>
-  singletonCell (mkCell1 3) c
+macroCosmicVexel s b d c = mkSortedBox4 envCell0 s envCell1 b envCell2 d envCell3 c
+
+||| Fast macro-cosmic Vexel builder for the canonical (27, 55, 128) Primorial 210 sector weights,
+||| sharing the static tail subtree across ticks.
+public export
+macroCosmicVexelCanonical : BoxInt -> Vexel
+macroCosmicVexelCanonical s =
+  if boxIsZero s
+    then macroCosmicZeroScale
+    else BoxNode 3 (BoxNode 1 BoxLeaf envCell0 s BoxLeaf) envCell1 (intToBoxInt 27) macroCosmicTail23
 
 public export
 macroScaleFactor : Vexel -> BoxInt
@@ -66,10 +97,10 @@ public export
 macroCosmicQuadStream : BoxInt -> BoxInt -> BoxInt -> BoxInt -> QuadStreamMultiset CosmicSectorToken
 macroCosmicQuadStream scale baryon dark cluster =
   MkQuadStream
-    (AddM EllipticMatterToken baryon ZeroM)
-    (AddM HyperbolicDarkEnergyToken cluster ZeroM)
-    (AddM ParabolicExpansionToken scale ZeroM)
-    (AddM SubstrateDarkMatterToken dark ZeroM)
+    (singletonCarrier EllipticMatterToken baryon)
+    (singletonCarrier HyperbolicDarkEnergyToken cluster)
+    (singletonCarrier ParabolicExpansionToken scale)
+    (singletonCarrier SubstrateDarkMatterToken dark)
 
 public export
 initMacroCosmicQuadStream : QuadStreamMultiset CosmicSectorToken
@@ -81,7 +112,7 @@ initMacroCosmicQuadStream =
 public export
 computeTotalCosmicMassQuadStream : QuadStreamMultiset a -> BoxInt
 computeTotalCosmicMassQuadStream (MkQuadStream e h p s) =
-  multisetSum e + multisetSum h + multisetSum s
+  totalMassBox e + totalMassBox h + totalMassBox s
 
 ||| Compiler proof witness verifying QuadStream cosmic budget closure (27 + 55 + 128 = 210).
 public export
